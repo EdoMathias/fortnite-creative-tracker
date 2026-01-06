@@ -1,4 +1,4 @@
-import { BackgroundController } from './controllers/BackgroundController';
+import { BackgroundController } from './controllers/background.controller';
 import { itemsDataService } from '../shared/services/ItemsDataService';
 
 const bootstrap = async () => {

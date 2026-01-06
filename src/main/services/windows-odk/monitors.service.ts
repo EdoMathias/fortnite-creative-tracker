@@ -28,7 +28,7 @@ export class MonitorsService {
      * Gets whether there is a second monitor.
      * @returns Whether there is a second monitor.
      */
-    public getHasSecondMonitor(): boolean {
+    public hasSecondMonitor(): boolean {
         return this._hasSecondMonitor;
     }
 

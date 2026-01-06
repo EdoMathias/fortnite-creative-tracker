@@ -27,6 +27,11 @@
         "title": "Toggle In-Game Tracker",
         "action-type": "custom",
         "default": "Ctrl+T"
+      },
+      "Toggle Desktop Tracker": {
+        "title": "Toggle Desktop Tracker",
+        "action-type": "custom",
+        "default": "Ctrl+Shift+T"
       }
     },
     "externally_connectable": {
@@ -47,7 +52,7 @@
         "is_background_page": true
       },
       "tracker_desktop": {
-        "file": "terminal_desktop.html",
+        "file": "tracker_desktop.html",
         "desktop_only": true,
         "native_window": true,
         "resizable": true,
@@ -64,14 +69,14 @@
         }
       },
       "tracker_ingame": {
-        "file": "terminal_ingame.html",
+        "file": "tracker_ingame.html",
         "in_game_only": true,
         "resizable": true,
         "transparent": true,
         "override_on_update": true,
         "grab_keyboard_focus": true,
         "focus_game_takeover": "ReleaseOnHidden",
-        "focus_game_takeover_release_hotkey": "Toggle In-Game Terminal",
+        "focus_game_takeover_release_hotkey": "Toggle In-Game Tracker",
         "size": {
           "width": 1600,
           "height": 800
@@ -88,7 +93,8 @@
     "game_targeting": {
       "type": "dedicated",
       "game_ids": [
-        21216
+        21216,
+        1136
       ]
     },
     "game_events": [
@@ -99,7 +105,8 @@
         "event": "GameLaunch",
         "event_data": {
           "game_ids": [
-            21216
+            21216,
+            1136
           ]
         },
         "start_minimized": true

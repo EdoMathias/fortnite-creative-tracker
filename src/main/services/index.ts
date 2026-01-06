@@ -1,8 +1,7 @@
-export { WindowManager } from './WindowManager';
+export { WindowsService } from './windows-odk/windows.service';
 export { GameStateManager } from './GameStateManager';
-export { HotkeyHandler } from './HotkeyHandler';
+export { HotkeysService } from './hotkeys.service';
 export { AppLaunchHandler } from './AppLaunchHandler';
 export { MessageChannel, MessageType, MessagePayload } from './MessageChannel';
-export { HotkeysService } from './HotkeysService';
 export { GameEventsService } from './GameEventsService';
-
+export { WindowsController } from '../controllers/windows.controller';

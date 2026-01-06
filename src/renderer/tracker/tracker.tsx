@@ -476,7 +476,7 @@ const Tracker: React.FC = () => {
   useEffect(() => {
     const setToggleHotkeyText = async () => {
       try {
-        const text = await OWHotkeys.getHotkeyText(kHotkeys.showHideTracker, kGameClassIds[0]);
+        const text = await OWHotkeys.getHotkeyText(kHotkeys.toggleTrackerIngameWindow, kGameClassIds[0]);
         setHotkeyText(text);
       } catch (error) {
         logger.error('Error getting hotkey text:', error);
@@ -484,7 +484,7 @@ const Tracker: React.FC = () => {
     };
 
     overwolf.settings.hotkeys.onChanged.addListener((event: overwolf.settings.hotkeys.OnChangedEvent) => {
-      if (event.name === kHotkeys.showHideTracker) {
+      if (event.name === kHotkeys.toggleTrackerIngameWindow) {
         setHotkeyText(event.binding);
       }
     });

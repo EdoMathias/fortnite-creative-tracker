@@ -18,13 +18,13 @@ export const kGameClassIds = [27168, 1136];
 
 export const kWindowNames = {
   background: 'background',
-  trackerDesktop: 'terminal_desktop',
-  trackerIngame: 'terminal_ingame'
+  trackerDesktop: 'tracker_desktop',
+  trackerIngame: 'tracker_ingame'
 };
 
 export const kHotkeys = {
-  showHideTracker: 'Toggle In-Game Terminal',
-  toggleDesktopWindow: 'Toggle Desktop Terminal'
+  toggleTrackerIngameWindow: 'Toggle In-Game Tracker',
+  toggleTrackerDesktopWindow: 'Toggle Desktop Tracker'
 };
 
 export type HotkeyData = {

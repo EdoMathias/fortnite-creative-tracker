@@ -25,8 +25,8 @@ export const FTUEWelcomeModal: React.FC = () => {
     const loadHotkeys = async () => {
       try {
         const [trackMeIngame, trackMeDesktop] = await Promise.all([
-          OWHotkeys.getHotkeyText(kHotkeys.showHideTracker, kGameClassIds[0]),
-          OWHotkeys.getHotkeyText(kHotkeys.toggleDesktopWindow, kGameClassIds[0]),
+          OWHotkeys.getHotkeyText(kHotkeys.toggleTrackerIngameWindow, kGameClassIds[0]),
+          OWHotkeys.getHotkeyText(kHotkeys.toggleTrackerDesktopWindow, kGameClassIds[0]),
         ]);
         setHotkeys({ trackMeIngame, trackMeDesktop });
       } catch (error) {

@@ -3,7 +3,7 @@ import { kWindowNames } from '../../shared/consts';
 import { MessageChannel, MessageType } from './MessageChannel';
 import { createLogger } from '../../shared/services/Logger';
 import { MonitorInfo } from './windows-odk/monitors.service';
-import { WindowsManagerService } from './windows-odk/windows-manager.service';
+import { WindowsService } from './windows-odk/windows.service';
 
 const logger = createLogger('WindowManager');
 
@@ -16,7 +16,7 @@ export class WindowManager {
   private _monitorsMap: Map<string, MonitorInfo> = new Map();
 
   // temp odk windows manager service
-  private _windowsManagerService: WindowsManagerService;
+  private _windowsService: WindowsService;
 
   constructor(messageChannel: MessageChannel) {
     this._messageChannel = messageChannel;
@@ -26,7 +26,7 @@ export class WindowManager {
     this.mapMonitors();
 
     // temp odk windows manager service
-    this._windowsManagerService = new WindowsManagerService();
+    this._windowsService = new WindowsService();
   }
 
 

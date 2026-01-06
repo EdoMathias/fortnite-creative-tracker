@@ -8,8 +8,8 @@ const
 module.exports = env => ({
     entry: {
         background: './src/main/background.ts',
-        terminal_desktop: './src/renderer/tracker/tracker.tsx',
-        terminal_ingame: './src/renderer/tracker/tracker.tsx'
+        tracker_desktop: './src/renderer/tracker/tracker.tsx',
+        tracker_ingame: './src/renderer/tracker/tracker.tsx'
     },
     devtool: 'inline-source-map',
     module: {
@@ -61,13 +61,13 @@ module.exports = env => ({
         }),
         new HtmlWebpackPlugin({
             template: './src/renderer/tracker/tracker.html',
-            filename: path.resolve(__dirname, './dist/terminal_desktop.html'),
-            chunks: ['terminal_desktop']
+            filename: path.resolve(__dirname, './dist/tracker_desktop.html'),
+            chunks: ['tracker_desktop']
         }),
         new HtmlWebpackPlugin({
             template: './src/renderer/tracker/tracker.html',
-            filename: path.resolve(__dirname, './dist/terminal_ingame.html'),
-            chunks: ['terminal_ingame']
+            filename: path.resolve(__dirname, './dist/tracker_ingame.html'),
+            chunks: ['tracker_ingame']
         }),
         new HtmlWebpackPlugin({
             template: './src/renderer/tracker/uninstall.html',

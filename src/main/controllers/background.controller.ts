@@ -1,12 +1,13 @@
 import { WindowManager } from '../services/WindowManager';
 import { GameStateManager } from '../services/GameStateManager';
-import { HotkeyHandler } from '../services/HotkeyHandler';
+import { HotkeysService } from '../services/hotkeys.service';
 import { AppLaunchHandler } from '../services/AppLaunchHandler';
 import { MessageChannel, MessageType } from '../services/MessageChannel';
 import { GameEventsService } from '../services/GameEventsService';
-import { kWindowNames } from '../../shared/consts';
+import { kHotkeys, kWindowNames } from '../../shared/consts';
 import { createLogger } from '../../shared/services/Logger';
-import { WindowsManagerService } from '../services/windows-odk/windows-manager.service';
+import { WindowsService } from '../services/windows-odk/windows.service';
+import { WindowsController } from './windows.controller';
 
 const logger = createLogger('BackgroundController');
 
@@ -17,29 +18,26 @@ const logger = createLogger('BackgroundController');
  */
 export class BackgroundController {
   private static _instance: BackgroundController;
-  
+
   private _messageChannel: MessageChannel;
-  private _windowManager: WindowManager;
+  private _windowsController: WindowsController;
   private _gameStateManager: GameStateManager;
-  private _hotkeyHandler: HotkeyHandler;
+  private _hotkeysService: HotkeysService;
   private _appLaunchHandler: AppLaunchHandler;
   private _gameEventsService: GameEventsService;
-
-  private _windowsManagerService: WindowsManagerService;
 
   private _isGameRunning: boolean = false;
 
   private constructor() {
     // Initialize MessageChannel first (used by other services)
     this._messageChannel = new MessageChannel();
-    
+
     // Initialize services with dependency injection
-    this._windowManager = new WindowManager(this._messageChannel);
     this._gameStateManager = new GameStateManager(this._messageChannel);
-    this._hotkeyHandler = new HotkeyHandler();
+    this._hotkeysService = new HotkeysService();
     this._appLaunchHandler = new AppLaunchHandler();
-    this._gameEventsService = new GameEventsService(this._messageChannel);
-    this._windowsManagerService = new WindowsManagerService();
+    // this._gameEventsService = new GameEventsService(this._messageChannel);
+    this._windowsController = new WindowsController(this._messageChannel);
 
     // Set up service callbacks
     this._setupGameStateHandlers();
@@ -62,11 +60,11 @@ export class BackgroundController {
     // Determine which window to show based on game state
     const shouldShowInGame = await this._gameStateManager.isSupportedGameRunning();
     if (shouldShowInGame) {
-      await this._windowManager.onGameLaunch();
+      await this._windowsController.onGameLaunch();
       await this._gameEventsService.onGameLaunched();
       this._isGameRunning = true;
     } else {
-      await this._windowManager.showDesktopWindow();
+      await this._windowsController.showTrackerDesktopWindow('primary');
       this._isGameRunning = false;
     }
   }
@@ -77,11 +75,11 @@ export class BackgroundController {
   private _setupGameStateHandlers(): void {
     this._gameStateManager.setOnGameStateChange(async (isRunning: boolean, gameInfo?: overwolf.games.RunningGameInfo) => {
       if (isRunning) {
-        await this._windowManager.onGameLaunch();
+        await this._windowsController.onGameLaunch();
         await this._gameEventsService.onGameLaunched(undefined, gameInfo);
         this._isGameRunning = true;
       } else {
-        await this._windowManager.onGameExit();
+        await this._windowsController.showTrackerDesktopWindow('primary');
         this._gameEventsService.onGameClosed();
         this._isGameRunning = false;
       }
@@ -92,21 +90,14 @@ export class BackgroundController {
    * Sets up the hotkey handlers.
    */
   private _setupHotkeyHandlers(): void {
-    // Toggle the tracker window visibility (show/hide)
-    this._hotkeyHandler.setOnShowHideTrackerVisibility(async () => {
-      await this._windowManager.toggleTrackerWindowVisibility();
+    // Show/Hide Desktop Tracker Window
+    this._hotkeysService.on(kHotkeys.toggleTrackerDesktopWindow, async () => {
+      await this._windowsController.toggleTrackerDesktopWindow();
     });
 
-    // Show/Hide desktop window
-    this._hotkeyHandler.setOnToggleDesktopWindow(async () => {
-      // Only toggle if we're in-game
-      if (this._isGameRunning) {
-        try {
-          await this._windowManager.toggleDesktopWindow();
-        } catch (error) {
-          logger.error('Error toggling desktop window:', error);
-        }
-      }
+    // Show/Hide In-Game Tracker Window
+    this._hotkeysService.on(kHotkeys.toggleTrackerIngameWindow, async () => {
+      await this._windowsController.toggleTrackerIngameWindow();
     });
 
   }
@@ -117,42 +108,20 @@ export class BackgroundController {
   private _setupAppLaunchHandlers(): void {
     this._appLaunchHandler.setOnLaunch(async () => {
       if (this._isGameRunning) {
-        await this._windowManager.onGameLaunch();
+        // await this._windowManager.onGameLaunch();
       } else {
-        await this._windowManager.showDesktopWindow();
+        // await this._windowManager.showDesktopWindow();
       }
     });
   }
 
-    /**
+  /**
    * Sets up message handlers for window-related messages
    */
-    private setupMessageHandlers(): void {
-      // Listen for window state changes from other windows
-      this._messageChannel.onMessage(MessageType.TRACKER_WINDOW_SWITCHED, (payload) => {
-        logger.debug('Window switched:', payload);
-      });
-    }
-
-  /**
-   * Gets the message channel instance (for external access if needed)
-   */
-  public getMessageChannel(): MessageChannel {
-    return this._messageChannel;
-  }
-
-  /**
-   * Gets the window manager instance (for external access if needed)
-   */
-  public getWindowManager(): WindowManager {
-    return this._windowManager;
-  }
-
-  /**
-   * Gets the game state manager instance (for external access if needed)
-   */
-  public getGameStateManager(): GameStateManager {
-    return this._gameStateManager;
+  private setupMessageHandlers(): void {
+    // Listen for window state changes from other windows
+    this._messageChannel.onMessage(MessageType.TRACKER_WINDOW_SWITCHED, (payload) => {
+      logger.debug('Window switched:', payload);
+    });
   }
 }
-
