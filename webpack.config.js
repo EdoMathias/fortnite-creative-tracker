@@ -7,9 +7,9 @@ const
 
 module.exports = env => ({
     entry: {
-        background: './src/background/background.ts',
-        terminal_desktop: './src/tracker/tracker.tsx',
-        terminal_ingame: './src/tracker/tracker.tsx'
+        background: './src/main/background.ts',
+        terminal_desktop: './src/renderer/tracker/tracker.tsx',
+        terminal_ingame: './src/renderer/tracker/tracker.tsx'
     },
     devtool: 'inline-source-map',
     module: {
@@ -55,22 +55,22 @@ module.exports = env => ({
             patterns: [ { from: "public", to: "./" } ],
         }),
         new HtmlWebpackPlugin({
-            template: './src/background/background.html',
+            template: './src/main/background.html',
             filename: path.resolve(__dirname, './dist/background.html'),
             chunks: ['background']
         }),
         new HtmlWebpackPlugin({
-            template: './src/tracker/tracker.html',
+            template: './src/renderer/tracker/tracker.html',
             filename: path.resolve(__dirname, './dist/terminal_desktop.html'),
             chunks: ['terminal_desktop']
         }),
         new HtmlWebpackPlugin({
-            template: './src/tracker/tracker.html',
+            template: './src/renderer/tracker/tracker.html',
             filename: path.resolve(__dirname, './dist/terminal_ingame.html'),
             chunks: ['terminal_ingame']
         }),
         new HtmlWebpackPlugin({
-            template: './src/tracker/uninstall.html',
+            template: './src/renderer/tracker/uninstall.html',
             filename: path.resolve(__dirname, './dist/uninstall.html'),
             chunks: []
         }),

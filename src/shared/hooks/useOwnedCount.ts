@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { createLogger } from '../../services/Logger';
+import { createLogger } from '../services/Logger';
 
 const logger = createLogger('useOwnedCount');
 

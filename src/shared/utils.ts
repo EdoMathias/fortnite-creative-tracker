@@ -1,4 +1,4 @@
-import { itemsDataService } from '../services/ItemsDataService';
+import { itemsDataService } from './services/ItemsDataService';
 import { EventRequirement, Item } from './types';
 
 /**
