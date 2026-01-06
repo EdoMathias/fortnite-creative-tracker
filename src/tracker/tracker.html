@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="../../css/general.css" />
+  <link rel="stylesheet" href="../../css/header.css" />
+  <link rel="stylesheet" href="../../css/ingame.css" />
+  <link rel="stylesheet" href="../../css/modal.css" />
+  <title>ArcTerminal - Desktop</title>
+  <script src="https://content.overwolf.com/libs/ads/latest/owads.min.js" async onerror="onAdsSDKNotLoaded()" onload="onAdsSDKReady()"></script>
+  <script>
+    const trackerLoggerFactory = window.recycleLoggerFactory;
+    const trackerLogger = trackerLoggerFactory ? trackerLoggerFactory('TrackerHTML') : console;
+
+    // Reached if the SDK's script failed to load (took too long, couldn't be found, etc)
+    function onAdsSDKNotLoaded() {
+        // If this happens, it is up to the app to decide how to proceed.
+        trackerLogger.error("Couldn't load owads.min.js!");
+    }
+
+    function onAdsSDKReady() {
+        if (!OwAd) {
+            // Reached if the SDK's script failed to properly load.
+            // If this happens, it is up to the app to decide how to proceed.
+            // onAdsSDKNotLoaded();
+            return;
+        }
+    }
+  </script>
+</head>
+<body class="in-game dark">
+  <div id="root"></div>
+</body>
+</html>
+
+

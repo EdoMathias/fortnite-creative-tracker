@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "moduleResolution": "node",
+    "removeComments": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "jsx": "react",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "types": [
+      "@overwolf/types"
+    ],
+    "rootDirs": [
+      "./src"
+    ],
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}

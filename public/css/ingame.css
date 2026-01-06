@@ -1,0 +1,694 @@
+@import url('https://fonts.googleapis.com/css2?family=Momo+Trust+Display&display=swap');
+
+body {
+  background-color: #333333;
+  margin: 0px;
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  min-height: 100vh;
+  overflow: hidden;
+  font-family: "Momo Trust Display", sans-serif;
+}
+
+main {
+  display: flex;
+  flex: 1;
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  height: calc(100vh - 60px);
+}
+
+.main-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow: hidden;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-family: "Momo Trust Display", sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+  color: #d5d5d5;
+}
+
+#logs {
+  display: flex;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  width: calc(100% - 210px);
+}
+
+.logColumn {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 50%;
+  padding-right: 30px;
+}
+
+#ad {
+  margin-top: auto;
+  height: 300px;
+  width: 400px;
+  background-color: #454545;
+  border-radius: 4px;
+}
+
+#other {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  width: 210px;
+}
+
+#other > #infoParagraph {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 16px;
+  line-height: 150%;
+  color: #8d8d8d;
+}
+
+#other > #sampleAdText {
+  margin: 1em 0 0.5em 0;
+  font-family: "Momo Trust Display", sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 13px;
+  line-height: 133.59%;
+  align-self: center;
+  color: #8d8d8d;
+}
+
+#other > p {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 16px;
+  line-height: 150%;
+}
+
+.dataText {
+  background-color: #464646;
+  border-radius: 4px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  white-space: nowrap;
+  padding: 10px;
+  margin-top: 16px;
+  color: #8d8d8d;
+  height: calc(100vh - 165px);
+  max-width: inherit;
+  font-size: 13px;
+}
+
+.dataText pre {
+  white-space: pre-line;
+  word-break: break-word;
+  margin: 5px 0;
+}
+
+.dataText::-webkit-scrollbar {
+  width: 20px;
+}
+
+.dataText::-webkit-scrollbar-track {
+  background: #333333;
+  border-left: 9px solid #464646;
+  border-right: 9px solid #464646;
+  margin: 10px 0px;
+}
+
+.dataText::-webkit-scrollbar-thumb {
+  background: #8d8d8d;
+  border-left: 8px solid #464646;
+  border-right: 8px solid #464646;
+}
+
+.highlight {
+  color: #00defa;
+}
+
+button.logCopy {
+  background: #464646;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
+  color: #d5d5d5;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 12px;
+  line-height: 120%;
+  padding: 6px 8px;
+  margin-top: 10px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+button.logCopy:hover {
+  background: #8d8d8d;
+  color: #ffffff;
+}
+
+/* Search and Item List Styles */
+.search-bar-container {
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 2px solid #333;
+  border-radius: 4px;
+  background-color: #1a1a1a;
+  color: #fff;
+  outline: none;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 2;
+}
+
+.search-input:focus {
+  border-color: #00defa;
+}
+
+.search-input-wrapper.focused .search-autocomplete {
+  border-color: #00defa;
+}
+
+.search-autocomplete {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 12px;
+  font-size: 16px;
+  border: 2px solid #333;
+  border-radius: 4px;
+  background-color: #1a1a1a;
+  color: transparent;
+  pointer-events: none;
+  z-index: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+  font-family: inherit;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+}
+
+.autocomplete-suggestion {
+  color: #666;
+}
+
+.results-count {
+  color: #8d8d8d;
+  font-size: 14px;
+  margin-bottom: 15px;
+  padding: 0 5px;
+  flex-shrink: 0;
+}
+
+.item-list-container {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.item-list-empty {
+  text-align: center;
+  padding: 40px;
+  color: #888;
+  font-size: 18px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-list-container::-webkit-scrollbar {
+  width: 12px;
+}
+
+.item-list-container::-webkit-scrollbar-track {
+  background: #333333;
+  border-radius: 6px;
+}
+
+.item-list-container::-webkit-scrollbar-thumb {
+  background: #8d8d8d;
+  border-radius: 6px;
+}
+
+.item-list-container::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+
+.item-card {
+  background-color: #2a2a2a;
+  padding: 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid #333;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-bottom: 10px;
+  min-height: 80px;
+  position: relative;
+  overflow: visible;
+}
+
+.item-card:hover {
+  background-color: #333;
+  border-color: var(--rarity-color, #00defa);
+}
+
+.item-card.expanded {
+  border-color: var(--rarity-color, #00defa);
+  border-width: 2px;
+}
+
+.item-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.item-card-name {
+  font-weight: bold;
+  font-size: 16px;
+  word-wrap: break-word;
+  word-break: break-word;
+  line-height: 1.4;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.item-card-recycle-status {
+  position: relative;
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  white-space: nowrap;
+  width: fit-content;
+}
+
+.item-card-separator {
+  width: 100%;
+  height: 1px;
+  background-color: #333;
+  margin-bottom: 12px;
+}
+
+.item-card-recycle-status.can-recycle {
+  background-color: rgba(124, 179, 66, 0.2);
+  color: #7cb342;
+}
+
+.item-card-recycle-status.dont-recycle {
+  background-color: rgba(255, 152, 0, 0.2);
+  color: #ff9800;
+}
+
+.item-card-icons-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.item-card-icons {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  flex: 0 0 auto;
+  position: relative;
+}
+
+.condition-icon {
+  position: relative;
+  font-size: 24px;
+  line-height: 1;
+  cursor: help;
+  flex: 0 0 auto;
+}
+
+/* Tooltip container */
+.custom-tooltip {
+  position: absolute;
+  bottom: 120%;                /* place above the icon/status */
+  left: 0;
+  background: rgba(25, 25, 25, 0.92);  /* Dark, subtle */
+  color: #f0f0f0;               /* Light text */
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  white-space: normal;
+  max-width: 300px;
+  pointer-events: none;         /* Does not block the UI */
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  z-index: 30;
+  text-align: left;
+  box-sizing: border-box;
+  min-width: 120px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Ensure tooltips don't overflow the card container on the left */
+.item-card {
+  overflow: visible;
+}
+
+/* All tooltips start from the left edge of the icon and extend to the right */
+.item-card-icons .condition-icon .custom-tooltip {
+  left: 0;
+  transform: translateX(0);
+}
+
+/* Fade in when hovering condition icons */
+.condition-icon:hover .custom-tooltip {
+  opacity: 1;
+}
+
+/* Fade in when hovering recycle status */
+.item-card-recycle-status:hover .custom-tooltip {
+  opacity: 1;
+}
+
+/* Tooltip arrow */
+.custom-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(25, 25, 25, 0.92) transparent transparent transparent;
+}
+
+.item-card-recycles-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.item-card-recycles-label {
+  font-size: 12px;
+  color: #8d8d8d;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.item-card-recycles-items {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.item-card-recycle-item {
+  font-size: 13px;
+  color: #d5d5d5;
+  font-weight: 500;
+}
+
+.item-card-owned-count {
+  font-size: 14px;
+  color: rgba(6, 182, 212, 1);
+  font-weight: 500;
+  flex: 1;
+  text-align: center;
+}
+
+.item-card-sell-price {
+  font-size: 14px;
+  color: #8d8d8d;
+  font-weight: 500;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.item-card-expanded {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #333;
+  animation: expandDown 0.3s ease;
+}
+
+@keyframes expandDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+  }
+}
+
+.expanded-section {
+  margin-bottom: 12px;
+}
+
+.expanded-section:last-child {
+  margin-bottom: 0;
+}
+
+.expanded-label {
+  color: #8d8d8d;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.expanded-value {
+  color: #d5d5d5;
+  font-size: 14px;
+}
+
+.expanded-recycle-items {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.recycle-item {
+  color: #d5d5d5;
+  font-size: 14px;
+  padding: 5px 0;
+}
+
+.no-item-selected {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #8d8d8d;
+  font-size: 18px;
+}
+
+.no-item-selected p {
+  margin: 0;
+}
+
+/* Item Detail Styles */
+.item-detail-container {
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  padding: 20px;
+  height: fit-content;
+  min-height: 100%;
+}
+
+.item-detail-header {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #333333;
+}
+
+.item-detail-name {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+  color: #d5d5d5;
+}
+
+.salvage-status {
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.salvage-status.safe {
+  background-color: rgba(124, 179, 66, 0.2);
+  border: 2px solid #7cb342;
+}
+
+.salvage-status.not-safe {
+  background-color: rgba(255, 152, 0, 0.2);
+  border: 2px solid #ff9800;
+}
+
+.status-text.safe {
+  color: #7cb342;
+}
+
+.status-text.warning {
+  color: #ff9800;
+}
+
+.conditions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.condition-box {
+  background-color: #333333;
+  border-radius: 6px;
+  padding: 15px;
+  border-left: 4px solid #00defa;
+}
+
+.condition-header {
+  font-size: 16px;
+  font-weight: bold;
+  color: #d5d5d5;
+  margin-bottom: 10px;
+}
+
+.condition-total {
+  font-size: 14px;
+  color: #8d8d8d;
+  margin-bottom: 10px;
+}
+
+.condition-total strong {
+  color: #d5d5d5;
+  font-size: 16px;
+}
+
+.condition-details {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.condition-details li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #464646;
+}
+
+.condition-details li:last-child {
+  border-bottom: none;
+}
+
+.condition-label {
+  color: #d5d5d5;
+  flex: 1;
+}
+
+.condition-count {
+  color: #8d8d8d;
+  font-weight: bold;
+}
+
+.item-info-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #333333;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #333333;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  color: #8d8d8d;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.info-value {
+  color: #d5d5d5;
+  font-size: 14px;
+}
+
+.recycle-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-end;
+}
+
+.recycle-item {
+  color: #d5d5d5;
+  font-size: 14px;
+}
+
+/* Scrollbar styling */
+.right-panel::-webkit-scrollbar {
+  width: 12px;
+}
+
+.right-panel::-webkit-scrollbar-track {
+  background: #333333;
+  border-radius: 6px;
+}
+
+.right-panel::-webkit-scrollbar-thumb {
+  background: #8d8d8d;
+  border-radius: 6px;
+}
+
+.right-panel::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}

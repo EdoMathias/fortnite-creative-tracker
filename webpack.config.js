@@ -1,0 +1,79 @@
+const
+    path = require('path'),
+    HtmlWebpackPlugin = require('html-webpack-plugin'),
+    CopyPlugin = require("copy-webpack-plugin"),
+    { CleanWebpackPlugin } = require('clean-webpack-plugin'),
+    OverwolfPlugin = require('./overwolf.webpack');
+
+module.exports = env => ({
+    entry: {
+        background: './src/background/background.ts',
+        terminal_desktop: './src/tracker/tracker.tsx',
+        terminal_ingame: './src/tracker/tracker.tsx'
+    },
+    devtool: 'inline-source-map',
+    module: {
+        rules: [
+            {
+                test: /\.tsx?$/,
+                use: 'ts-loader',
+                exclude: /node_modules/
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    'style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            url: {
+                                filter: (url, resourcePath) => {
+                                    // Don't process URLs for window control SVGs
+                                    // These are already copied by CopyPlugin to dist/img/
+                                    if (url.includes('img/window_') || url.includes('../../public/img/') || url.startsWith('img/')) {
+                                        return false;
+                                    }
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    resolve: {
+        extensions: ['.tsx', '.ts', '.js']
+    },
+    output: {
+      path: path.resolve(__dirname, 'dist/'),
+      filename: 'js/[name].js'
+    },
+    plugins: [
+        new CleanWebpackPlugin,
+        new CopyPlugin({
+            patterns: [ { from: "public", to: "./" } ],
+        }),
+        new HtmlWebpackPlugin({
+            template: './src/background/background.html',
+            filename: path.resolve(__dirname, './dist/background.html'),
+            chunks: ['background']
+        }),
+        new HtmlWebpackPlugin({
+            template: './src/tracker/tracker.html',
+            filename: path.resolve(__dirname, './dist/terminal_desktop.html'),
+            chunks: ['terminal_desktop']
+        }),
+        new HtmlWebpackPlugin({
+            template: './src/tracker/tracker.html',
+            filename: path.resolve(__dirname, './dist/terminal_ingame.html'),
+            chunks: ['terminal_ingame']
+        }),
+        new HtmlWebpackPlugin({
+            template: './src/tracker/uninstall.html',
+            filename: path.resolve(__dirname, './dist/uninstall.html'),
+            chunks: []
+        }),
+        new OverwolfPlugin(env)
+    ]
+})
