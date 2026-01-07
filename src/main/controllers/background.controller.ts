@@ -1,7 +1,7 @@
 import { WindowManager } from '../services/WindowManager';
-import { GameStateManager } from '../services/GameStateManager';
+import { GameStateManager } from '../services/game-state.service';
 import { HotkeysService } from '../services/hotkeys.service';
-import { AppLaunchHandler } from '../services/AppLaunchHandler';
+import { AppLaunchService } from '../services/app-launch.service';
 import { MessageChannel, MessageType } from '../services/MessageChannel';
 import { GameEventsService } from '../services/GameEventsService';
 import { kHotkeys, kWindowNames } from '../../shared/consts';
@@ -23,7 +23,7 @@ export class BackgroundController {
   private _windowsController: WindowsController;
   private _gameStateManager: GameStateManager;
   private _hotkeysService: HotkeysService;
-  private _appLaunchHandler: AppLaunchHandler;
+  private _appLaunchService: AppLaunchService;
   private _gameEventsService: GameEventsService;
 
   private _isGameRunning: boolean = false;
@@ -31,18 +31,18 @@ export class BackgroundController {
   private constructor() {
     // Initialize MessageChannel first (used by other services)
     this._messageChannel = new MessageChannel();
+    this._hotkeysService = new HotkeysService();
+    this._appLaunchService = new AppLaunchService(() => this.handleAppLaunch());
+
 
     // Initialize services with dependency injection
     this._gameStateManager = new GameStateManager(this._messageChannel);
-    this._hotkeysService = new HotkeysService();
-    this._appLaunchHandler = new AppLaunchHandler();
     // this._gameEventsService = new GameEventsService(this._messageChannel);
     this._windowsController = new WindowsController(this._messageChannel);
 
     // Set up service callbacks
     this._setupGameStateHandlers();
     this._setupHotkeyHandlers();
-    this._setupAppLaunchHandlers();
     this.setupMessageHandlers();
   }
 
@@ -64,7 +64,8 @@ export class BackgroundController {
       await this._gameEventsService.onGameLaunched();
       this._isGameRunning = true;
     } else {
-      await this._windowsController.showTrackerDesktopWindow('primary');
+      // Change later to primary
+      await this._windowsController.showTrackerDesktopWindow('secondary');
       this._isGameRunning = false;
     }
   }
@@ -79,7 +80,8 @@ export class BackgroundController {
         await this._gameEventsService.onGameLaunched(undefined, gameInfo);
         this._isGameRunning = true;
       } else {
-        await this._windowsController.showTrackerDesktopWindow('primary');
+        // Change later to primary
+        await this._windowsController.showTrackerDesktopWindow('secondary');
         this._gameEventsService.onGameClosed();
         this._isGameRunning = false;
       }
@@ -110,17 +112,15 @@ export class BackgroundController {
 
   }
 
-  /**
-   * Sets up the app launch handlers.
+  /** 
+   * Handles user-initiated app launches (clicking the app icon). 
    */
-  private _setupAppLaunchHandlers(): void {
-    this._appLaunchHandler.setOnLaunch(async () => {
-      if (this._isGameRunning) {
-        // await this._windowManager.onGameLaunch();
-      } else {
-        // await this._windowManager.showDesktopWindow();
-      }
-    });
+  private async handleAppLaunch(): Promise<void> {
+    if (this._isGameRunning) {
+      // await this._windowManager.onGameLaunch();
+    } else {
+      // await this._windowManager.showDesktopWindow();
+    }
   }
 
   /**
