@@ -1,12 +1,10 @@
-import { WindowManager } from '../services/WindowManager';
 import { GameStateService } from '../services/game-state.service';
 import { HotkeysService } from '../services/hotkeys.service';
 import { AppLaunchService } from '../services/app-launch.service';
 import { MessageChannel, MessageType } from '../services/MessageChannel';
-import { GameEventsService } from '../services/GameEventsService';
+import { GameEventsService } from '../services/game-events.service';
 import { kHotkeys } from '../../shared/consts';
 import { createLogger } from '../../shared/services/Logger';
-import { WindowsService } from '../services/windows-odk/windows.service';
 import { WindowsController } from './windows.controller';
 
 const logger = createLogger('BackgroundController');
@@ -37,14 +35,11 @@ export class BackgroundController {
       this._messageChannel,
       (isRunning, gameInfo) => this.handleGameStateChange(isRunning, gameInfo)
     );
-
-
-    // Initialize services with dependency injection
-    // this._gameEventsService = new GameEventsService(this._messageChannel);
+    this._gameEventsService = new GameEventsService(this._messageChannel);
     this._windowsController = new WindowsController(this._messageChannel);
 
     // Set up service callbacks
-    this._setupHotkeyHandlers();
+    this.setupHotkeyHandlers();
     this.setupMessageHandlers();
   }
 
@@ -78,12 +73,12 @@ export class BackgroundController {
   private async handleGameStateChange(isRunning: boolean, gameInfo?: overwolf.games.RunningGameInfo): Promise<void> {
     if (isRunning) {
       await this._windowsController.onGameLaunch();
-      await this._gameEventsService.onGameLaunched(undefined, gameInfo);
+      // await this._gameEventsService.onGameLaunched(undefined, gameInfo);
       this._isGameRunning = true;
     } else {
       // Change later to primary
       await this._windowsController.showTrackerDesktopWindow('secondary');
-      this._gameEventsService.onGameClosed();
+      // this._gameEventsService.onGameClosed();
       this._isGameRunning = false;
     }
   }
@@ -91,7 +86,7 @@ export class BackgroundController {
   /**
    * Sets up the hotkey handlers.
    */
-  private _setupHotkeyHandlers(): void {
+  private setupHotkeyHandlers(): void {
     // Show/Hide Desktop Tracker Window
     this._hotkeysService.on(kHotkeys.toggleTrackerDesktopWindow, async () => {
       try {
