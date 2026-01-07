@@ -89,8 +89,13 @@ export class GameStateService {
    * @returns true if the game is supported
    */
   private isSupportedGame(gameInfo: RunningGameInfo): boolean {
-    logger.log('Checking if game is supported:', gameInfo.classId);
-    return kGameClassIds.includes(gameInfo.classId);
+    if (kGameClassIds.includes(gameInfo.classId)) {
+      logger.log('Game is supported:', gameInfo.classId);
+      return true;
+    } else {
+      logger.error('Game is not supported:', gameInfo.classId);
+      return false;
+    }
   }
 
   private async executeStateChangeCallback(isRunning: boolean, gameInfo?: RunningGameInfo): Promise<void> {

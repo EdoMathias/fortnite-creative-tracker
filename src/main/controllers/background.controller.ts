@@ -117,9 +117,10 @@ export class BackgroundController {
    */
   private async handleAppLaunch(): Promise<void> {
     if (this._isGameRunning) {
-      // await this._windowManager.onGameLaunch();
+      await this._windowsController.onGameLaunch();
     } else {
-      // await this._windowManager.showDesktopWindow();
+      // Change later to primary
+      await this._windowsController.showTrackerDesktopWindow('secondary');
     }
   }
 
