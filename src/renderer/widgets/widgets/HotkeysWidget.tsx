@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { HotkeysService } from '../../../main/services/HotkeysService';
 import { HotkeyData, kHotkeys } from '../../../shared/consts';
 import { createLogger } from '../../../shared/services/Logger';
+import { HotkeysAPI } from '../../../shared/services/hotkeys';
 
 const logger = createLogger('HotkeysWidget');
 
@@ -67,7 +67,7 @@ export const HotkeysWidget: React.FC = () => {
     const loadHotkeys = async () => {
       try {
         setLoading(true);
-        const hotkeysMap = await HotkeysService.instance().fetchAllHotkeys();
+        const hotkeysMap = await HotkeysAPI.fetchAll();
         const appHotkeys = Array.from(hotkeysMap.values())
           .filter(h => Object.values(kHotkeys).includes(h.name))
           .map(h => {

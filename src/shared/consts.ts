@@ -1,7 +1,9 @@
+export const FORTNITE_GAME_ID = 21216;
+
 export const kGamesFeatures = new Map<number, string[]>([
-  // Arc Raiders
+  // Fortnite
   [
-    27168,
+    FORTNITE_GAME_ID,
     [
       'match_info','game_info'
     ]
@@ -14,7 +16,7 @@ export const kGamesFeatures = new Map<number, string[]>([
   ]
 ]);
 
-export const kGameClassIds = [27168, 1136];
+export const kGameClassIds = [FORTNITE_GAME_ID, 1136];
 
 export const kWindowNames = {
   background: 'background',

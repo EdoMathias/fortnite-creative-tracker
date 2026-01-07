@@ -92,12 +92,20 @@ export class BackgroundController {
   private _setupHotkeyHandlers(): void {
     // Show/Hide Desktop Tracker Window
     this._hotkeysService.on(kHotkeys.toggleTrackerDesktopWindow, async () => {
-      await this._windowsController.toggleTrackerDesktopWindow();
+      try {
+        await this._windowsController.toggleTrackerDesktopWindow();
+      } catch (error) {
+        logger.error('Error toggling desktop tracker window:', error);
+      }
     });
 
     // Show/Hide In-Game Tracker Window
     this._hotkeysService.on(kHotkeys.toggleTrackerIngameWindow, async () => {
-      await this._windowsController.toggleTrackerIngameWindow();
+      try {
+        await this._windowsController.toggleTrackerIngameWindow();
+      } catch (error) {
+        logger.error('Error toggling in-game tracker window:', error);
+      }
     });
 
   }

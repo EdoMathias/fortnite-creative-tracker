@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import AnyTypeInput from '../../components/AnyTypeInput';
-import { HotkeysService } from '../../../main/services/HotkeysService';
 import { HotkeyData, kHotkeys } from '../../../shared/consts';
 import { createLogger } from '../../../shared/services/Logger';
+import { HotkeysAPI } from '../../../shared/services/hotkeys';
 
 const logger = createLogger('HotkeysSettings');
 
@@ -249,11 +249,11 @@ const HotKeysSettings = () => {
       virtualKeycode: keyCodeNum,
     };
 
-    HotkeysService.instance().updateHotkey(hotkeyObject)
+    HotkeysAPI.update(hotkeyObject)
       .then(() => {
         logger.log('Hotkey updated', { hotkeyName, binding: hotkeyCombination });
         // Success - refresh hotkeys
-        HotkeysService.instance().fetchAllHotkeys().then(hotkeysMap => {
+        HotkeysAPI.fetchAll().then(hotkeysMap => {
           const appHotkeys = Array.from(hotkeysMap.values()).filter(h =>
             Object.values(kHotkeys).includes(h.name)
           );
@@ -437,15 +437,16 @@ const HotKeysSettings = () => {
 
   useEffect(() => {
     const loadHotkeys = async () => {
-      const hotkeysMap = await HotkeysService.instance().fetchAllHotkeys();
-      logger.log('Hotkeys map:', hotkeysMap);
-      const appHotkeys = Array.from(hotkeysMap.values()).filter(h =>
-        Object.values(kHotkeys).includes(h.name)
-      );
-      setHotkeys(appHotkeys);
-      logger.log('Loaded tracker hotkeys', { count: appHotkeys.length });
+      try {
+        const hotkeysMap = await HotkeysAPI.fetchAll();
+        const appHotkeys = Array.from(hotkeysMap.values()).filter(h =>
+          Object.values(kHotkeys).includes(h.name)
+        );
+        setHotkeys(appHotkeys);
+      } catch (err) {
+        logger.error('Failed to load hotkeys:', err);
+      }
     };
-
     loadHotkeys();
   }, []);
 
