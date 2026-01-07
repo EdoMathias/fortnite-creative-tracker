@@ -20,7 +20,7 @@ import { gameTimeService } from "../../shared/services/GameTimeService";
 import "../styles/styles.css";
 
 const logger = createLogger('Tracker');
-const VIEW_MODE_KEY_DESKTOP = 'recycleme_view_mode_desktop';
+const VIEW_MODE_KEY_DESKTOP = 'fortnite_map_tracker_view_mode_desktop';
 const VIEW_MODE_KEY_INGAME = 'recycleme_view_mode_ingame';
 const getViewModeStorageKey = (windowName?: string | null) =>
   windowName === kWindowNames.trackerIngame ? VIEW_MODE_KEY_INGAME : VIEW_MODE_KEY_DESKTOP;
@@ -914,7 +914,7 @@ const Tracker: React.FC = () => {
         startAtSelection={isMassCompleteOpen}
       />
       <AppHeader 
-        title={isIngameWindow ? 'ArcTerminal • In-Game' : 'ArcTerminal • Desktop'}
+        title={isIngameWindow ? 'Fortnite Map Tracker • In-Game' : 'Fortnite Map Tracker • Desktop'}
         appVersion={appVersion ?? undefined}
         hotkeyText={hotkeyText} 
         itemCount={Object.keys(trackedItems).length} 

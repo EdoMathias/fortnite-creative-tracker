@@ -47,7 +47,7 @@ export const FTUEWelcomeModal: React.FC = () => {
     <div className="ftue-overlay">
       <div className="ftue-welcome-modal">
         <div className="ftue-welcome-header">
-          <h2>Welcome to ArcTerminal!</h2>
+          <h2>Welcome to Fortnite Map Tracker!</h2>
           <p className="ftue-welcome-subtitle">
             Your companion for Arc Raiders to help you decide whether to sell, recycle, or keep your looted items.
             <br />
@@ -61,7 +61,7 @@ export const FTUEWelcomeModal: React.FC = () => {
           <div className="ftue-feature">
             <div className="ftue-feature-icon">📊</div>
             <div className="ftue-feature-info">
-              <h3>ArcTerminal</h3>
+              <h3>Fortnite Map Tracker</h3>
               <p>Track your owned items and mark completed stations</p>
               <span>Show/Hide the window in-game with: </span>
               <div className="ftue-hotkey-badge">{hotkeys.trackMeIngame}</div>

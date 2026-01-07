@@ -18,7 +18,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   return (
     <header id="header" className="app-header">
       <img src="../../img/logo-icon.png" alt="Header icon" />
-      <h1>ArcTerminal - Desktop</h1>
+      <h1>Fortnite Map Tracker - Desktop</h1>
       {showHotkey ? (
         <h1 className="hotkey-text">
           Show/Hide: <kbd id="hotkey">{hotkeyText}</kbd> • Tracking {itemCount} items

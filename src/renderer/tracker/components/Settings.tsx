@@ -168,10 +168,10 @@ export const Settings: React.FC<SettingsProps> = ({ onResetProgression, onResetG
           <>
             <div className="settings-main">
               <div className="settings-section">
-                <h3 className="settings-section-title">About ArcTerminal</h3>
+                <h3 className="settings-section-title">About Fortnite Map Tracker</h3>
                 <p className="settings-section-description">
-                  ArcTerminal is an unofficial item tracker for Arc Raiders, designed to help you track your progress,
-                  quests, and crafting requirements.
+                  Fortnite Map Tracker is an unofficial tracker for Fortnite, designed to help you track 
+                  previously played maps and modes and how long you've spent in each.
                 </p>
 
                 <div
