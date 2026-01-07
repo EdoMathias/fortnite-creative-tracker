@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import { OWHotkeys } from "@overwolf/overwolf-api-ts";
-import { AppWindow } from "../AppWindow";
-import { kWindowNames, kHotkeys, kGameClassIds } from "../../shared/consts";
+import { kHotkeys, kGameClassIds } from "../../shared/consts";
 import { AppHeader, FTUEWelcomeModal, UnassignedHotkeyModal, ReleaseNotesModal } from "../components";
 import { FTUEProvider, useFTUE } from "../contexts/FTUEContext";
 import { AdContainer, Settings } from "./components";
@@ -13,6 +12,8 @@ import { WidgetContainer } from "../widgets";
 import { ViewMode } from "../widgets/types";
 import { gameTimeService } from "../../shared/services/GameTimeService";
 import "../styles/styles.css";
+import { useAppVersion } from '../hooks/useAppVersion';
+import { useWindowInfo } from '../hooks/useWindowInfo';
 
 const logger = createLogger('Tracker');
 
@@ -27,12 +28,10 @@ const VIEW_TABS: { mode: ViewMode; label: string; icon: string }[] = [
 ];
 
 const Tracker: React.FC = () => {
-  const [windowName, setWindowName] = useState<string | null>(null);
+  const { isIngameWindow } = useWindowInfo();
   const [hotkeyText, setHotkeyText] = useState<string>('');
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [settingsInitialTab, setSettingsInitialTab] = useState<'general' | 'hotkeys' | 'data' | 'about'>('general');
-  const [isIngameWindow, setIsIngameWindow] = useState<boolean>(false);
-  const [appVersion, setAppVersion] = useState<string | null>(null);
   const [releaseNotesEntry, setReleaseNotesEntry] = useState<ReleaseNoteEntry | null>(null);
   const [isReleaseNotesModalOpen, setIsReleaseNotesModalOpen] = useState<boolean>(false);
   const [releaseNotesViewed, setReleaseNotesViewed] = useState<boolean>(false);
@@ -108,28 +107,10 @@ const Tracker: React.FC = () => {
     };
   }, []);
 
-  // Get manifest information for displaying the app version
-  useEffect(() => {
-    try {
-      overwolf.extensions.current.getManifest((manifest: overwolf.extensions.Manifest | undefined) => {
-        const version = manifest?.meta?.version;
-        if (version) {
-          setAppVersion(version);
-        } else {
-          logger.warn('Manifest did not include a version value');
-        }
-      });
-    } catch (error) {
-      logger.error('Failed to load manifest version', error);
-    }
-  }, []);
+  const appVersion = useAppVersion() ?? 'Unknown';
 
   // Fetch release notes for the current version and show them only after FTUE is complete
   useEffect(() => {
-    if (!appVersion) {
-      return;
-    }
-
     let isDisposed = false;
 
     const loadReleaseNotes = async () => {
@@ -192,37 +173,6 @@ const Tracker: React.FC = () => {
       window.removeEventListener('localStorageChange', handleCustomStorageChange);
     };
   }, [releaseNotesEntry]);
-
-  // Initialize AppWindow - detect which window we're running in
-  useEffect(() => {
-    const detectWindowName = async () => {
-      return new Promise<string>((resolve) => {
-        overwolf.windows.getCurrentWindow((result) => {
-          if (result.success && result.window) {
-            const windowName = result.window.name;
-            // Check if it's desktop or in-game version
-            if (windowName === kWindowNames.trackerDesktop || windowName === kWindowNames.trackerIngame) {
-              resolve(windowName);
-            } else {
-              // Fallback to desktop if detection fails
-              resolve(kWindowNames.trackerDesktop);
-            }
-          } else {
-            // Fallback to desktop if detection fails
-            resolve(kWindowNames.trackerDesktop);
-          }
-        });
-      });
-    };
-
-    detectWindowName().then((windowName) => {
-      logger.log('Detected tracker window', windowName);
-      const appWindow = new AppWindow(windowName);
-      // Set whether this is the in-game window
-      setWindowName(windowName);
-      setIsIngameWindow(windowName === kWindowNames.trackerIngame);
-    });
-  }, []);
 
   // Set up hotkey text
   useEffect(() => {

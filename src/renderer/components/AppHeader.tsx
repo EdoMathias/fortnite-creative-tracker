@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { Windows, WindowBase } from '@overwolf/odk-ts';
 
 interface AppHeaderProps {
   title: string;
@@ -19,8 +20,29 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   showHotkey = true,
   actionButtons = []
 }) => {
+  const windowRef = useRef<WindowBase | null>(null);
+
+  // Cache the window reference on mount so drag can be called synchronously
+  // this fixed an issue where the window enchored to the center of the screen 
+  // when starting to drag the window
+  useEffect(() => {
+    Windows.Self().then((window) => {
+      windowRef.current = window;
+    }).catch((error) => {
+      console.error('Error getting window reference:', error);
+    });
+  }, []);
+
+  const handleDragStart = useCallback(() => {
+    if (windowRef.current) {
+      windowRef.current.move().catch((error) => {
+        console.error('Error initiating window drag:', error);
+      });
+    }
+  }, []);
+
   return (
-    <header id="header" className="app-header">
+    <header id="header" className="app-header" onMouseDown={handleDragStart}>
       <img src="../../img/logo-icon.png" alt="Header icon" />
       <h1>
         {title}
@@ -33,8 +55,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           Show/Hide: <kbd id="hotkey">{hotkeyText}</kbd>
         </h1>
       )}
+      <div className='header-drag-handle'></div>
       {actionButtons.length > 0 && (
-        <div className="header-actions-group">
+        <div className="header-actions-group" onMouseDown={(e) => e.stopPropagation()}>
           {actionButtons.map((button, index) => (
             <button
               key={index}
@@ -47,7 +70,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           ))}
         </div>
       )}
-      <div className="window-controls-group">
+      <div className="window-controls-group" onMouseDown={(e) => e.stopPropagation()}>
         <button id="minimizeButton" className="window-control window-control-minimize" />
         <button id="maximizeButton" className="window-control window-control-maximize" />
         <button id="closeButton" className="window-control window-control-close" />
