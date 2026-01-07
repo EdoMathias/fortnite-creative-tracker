@@ -1,10 +1,10 @@
 import { WindowManager } from '../services/WindowManager';
-import { GameStateManager } from '../services/game-state.service';
+import { GameStateService } from '../services/game-state.service';
 import { HotkeysService } from '../services/hotkeys.service';
 import { AppLaunchService } from '../services/app-launch.service';
 import { MessageChannel, MessageType } from '../services/MessageChannel';
 import { GameEventsService } from '../services/GameEventsService';
-import { kHotkeys, kWindowNames } from '../../shared/consts';
+import { kHotkeys } from '../../shared/consts';
 import { createLogger } from '../../shared/services/Logger';
 import { WindowsService } from '../services/windows-odk/windows.service';
 import { WindowsController } from './windows.controller';
@@ -21,7 +21,7 @@ export class BackgroundController {
 
   private _messageChannel: MessageChannel;
   private _windowsController: WindowsController;
-  private _gameStateManager: GameStateManager;
+  private _gameStateService: GameStateService;
   private _hotkeysService: HotkeysService;
   private _appLaunchService: AppLaunchService;
   private _gameEventsService: GameEventsService;
@@ -33,15 +33,17 @@ export class BackgroundController {
     this._messageChannel = new MessageChannel();
     this._hotkeysService = new HotkeysService();
     this._appLaunchService = new AppLaunchService(() => this.handleAppLaunch());
+    this._gameStateService = new GameStateService(
+      this._messageChannel,
+      (isRunning, gameInfo) => this.handleGameStateChange(isRunning, gameInfo)
+    );
 
 
     // Initialize services with dependency injection
-    this._gameStateManager = new GameStateManager(this._messageChannel);
     // this._gameEventsService = new GameEventsService(this._messageChannel);
     this._windowsController = new WindowsController(this._messageChannel);
 
     // Set up service callbacks
-    this._setupGameStateHandlers();
     this._setupHotkeyHandlers();
     this.setupMessageHandlers();
   }
@@ -58,7 +60,7 @@ export class BackgroundController {
    */
   public async run(): Promise<void> {
     // Determine which window to show based on game state
-    const shouldShowInGame = await this._gameStateManager.isSupportedGameRunning();
+    const shouldShowInGame = await this._gameStateService.isSupportedGameRunning();
     if (shouldShowInGame) {
       await this._windowsController.onGameLaunch();
       await this._gameEventsService.onGameLaunched();
@@ -71,21 +73,19 @@ export class BackgroundController {
   }
 
   /**
-   * Sets up the game state handlers.
+   * Handles game state changes (game launched/terminated).
    */
-  private _setupGameStateHandlers(): void {
-    this._gameStateManager.setOnGameStateChange(async (isRunning: boolean, gameInfo?: overwolf.games.RunningGameInfo) => {
-      if (isRunning) {
-        await this._windowsController.onGameLaunch();
-        await this._gameEventsService.onGameLaunched(undefined, gameInfo);
-        this._isGameRunning = true;
-      } else {
-        // Change later to primary
-        await this._windowsController.showTrackerDesktopWindow('secondary');
-        this._gameEventsService.onGameClosed();
-        this._isGameRunning = false;
-      }
-    });
+  private async handleGameStateChange(isRunning: boolean, gameInfo?: overwolf.games.RunningGameInfo): Promise<void> {
+    if (isRunning) {
+      await this._windowsController.onGameLaunch();
+      await this._gameEventsService.onGameLaunched(undefined, gameInfo);
+      this._isGameRunning = true;
+    } else {
+      // Change later to primary
+      await this._windowsController.showTrackerDesktopWindow('secondary');
+      this._gameEventsService.onGameClosed();
+      this._isGameRunning = false;
+    }
   }
 
   /**

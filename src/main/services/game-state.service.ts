@@ -1,9 +1,9 @@
-import { OWGames, OWGameListener } from '@overwolf/overwolf-api-ts';
+import { OWGames } from '@overwolf/overwolf-api-ts';
 import { kGameClassIds } from '../../shared/consts';
-import { MessageChannel, MessageType } from './MessageChannel';
+import { MessageChannel } from './MessageChannel';
 import { createLogger } from '../../shared/services/Logger';
 
-const logger = createLogger('GameStateManager');
+const logger = createLogger('GameStateService');
 
 import RunningGameInfo = overwolf.games.RunningGameInfo;
 
@@ -16,39 +16,14 @@ import RunningGameInfo = overwolf.games.RunningGameInfo;
  * - Broadcasts game state changes to all windows via MessageChannel
  * - Notifies the controller when game state changes
  */
-export class GameStateManager {
-  private _gameListener: OWGameListener;
-  private _stateChangeCallback?: (isRunning: boolean, gameInfo?: RunningGameInfo) => Promise<void> | void;
-  private _messageChannel: MessageChannel;
-
-  constructor(messageChannel: MessageChannel) {
-    this._messageChannel = messageChannel;
-    // this._gameListener = new OWGameListener({
-    //   onGameStarted: this.handleGameStateChange.bind(this),
-    //   onGameEnded: this.handleGameStateChange.bind(this)
-    // });
-
+export class GameStateService {
+  constructor(
+    private messageChannel: MessageChannel,
+    private onStateChange: (isRunning: boolean, gameInfo?: RunningGameInfo) => Promise<void>
+  ) {
     overwolf.games.onGameInfoUpdated.addListener((event: overwolf.games.GameInfoUpdatedEvent) => {
       this.handleGameStateChange(event);
     });
-  }
-
-  /**
-   * Registers a callback to be executed when the game state changes (started/ended).
-   * 
-   * @param callback - Function called with true when game starts, false when game ends
-   */
-  public setOnGameStateChange(callback: (isRunning: boolean, gameInfo?: RunningGameInfo) => Promise<void> | void): void {
-    this._stateChangeCallback = callback;
-  }
-
-  /**
-   * Starts monitoring for game state changes.
-   * Must be called after setting up callbacks.
-   */
-  public start(): void {
-    this._gameListener.start();
-    logger.log('Started monitoring game state');
   }
 
   /**
@@ -94,27 +69,6 @@ export class GameStateManager {
     }
   }
 
-  /**
-   * Broadcasts game state changes to all app windows.
-   * 
-   * @param isRunning - Whether the game is currently running
-   * @param gameInfo - The game information
-   */
-  private broadcastGameStateChange(isRunning: boolean, gameInfo: RunningGameInfo): void {
-    this._messageChannel.broadcastMessage(
-      ['background'],
-      MessageType.GAME_STATE_CHANGED,
-      {
-        isRunning,
-        gameInfo: {
-          classId: gameInfo.classId,
-          title: gameInfo.title,
-          isRunning: gameInfo.isRunning
-        }
-      }
-    );
-  }
-
   private handleGameLaunched(event: overwolf.games.GameInfoUpdatedEvent): void {
     if (!this.isSupportedGame(event.gameInfo)) {
       logger.debug('Ignoring game state change for unsupported game:', event.gameInfo?.classId);
@@ -139,15 +93,9 @@ export class GameStateManager {
     return kGameClassIds.includes(gameInfo.classId);
   }
 
-  private executeStateChangeCallback(isRunning: boolean, gameInfo?: RunningGameInfo): void {
-    if (!this._stateChangeCallback) {
-      return;
-    }
-
+  private async executeStateChangeCallback(isRunning: boolean, gameInfo?: RunningGameInfo): Promise<void> {
     try {
-      Promise.resolve(this._stateChangeCallback(isRunning, gameInfo)).catch((error) => {
-        logger.error('Error in game state change callback:', error);
-      });
+      await this.onStateChange(isRunning, gameInfo);
     } catch (error) {
       logger.error('Error in game state change callback:', error);
     }
