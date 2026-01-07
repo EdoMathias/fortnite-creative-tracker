@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { progressService } from '../services/ProgressService';
 import { ProgressStats } from '../types';
-import { itemsDataService } from '../../../shared/services/ItemsDataService';
+import { Item } from '../../../shared/types';
 
 export const ProgressWidget: React.FC = () => {
   const [stats, setStats] = useState<ProgressStats>({
@@ -12,7 +12,7 @@ export const ProgressWidget: React.FC = () => {
 
   useEffect(() => {
     const updateStats = () => {
-      const allItems = itemsDataService.getItemsArray();
+      const allItems: Item[] = [];
       setStats(progressService.getProgressStats(allItems));
     };
 

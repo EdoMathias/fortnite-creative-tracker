@@ -1,12 +1,4 @@
-import { itemsDataService } from './services/ItemsDataService';
 import { EventRequirement, Item } from './types';
-
-/**
- * Converts the items.json object to an array of items
- */
-export const getItemsArray = (): Item[] => {
-  return itemsDataService.getItemsArray();
-};
 
 /**
  * Gets the color for a rarity
@@ -67,4 +59,3 @@ export const getTotalCountNeeded = (item: Item): number => {
   
   return total;
 };
-

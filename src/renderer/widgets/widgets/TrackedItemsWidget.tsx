@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { itemsDataService } from '../../../shared/services/ItemsDataService';
 import { getRarityColor, getTotalCountNeeded } from '../../../shared/utils';
+import { Item } from '../../../shared/types';
 
 interface TrackedItem {
   itemName: string;
@@ -84,10 +84,10 @@ export const TrackedItemsWidget: React.FC = () => {
     };
   }, []);
 
-  const allItems = itemsDataService.getItemsArray();
+  const allItems: Item[] = [];
   const itemsMap = useMemo(() => {
     return new Map(allItems.map(item => [item.name, item]));
-  }, [allItems]);
+  }, []);
 
   // Convert tracked items to array and sort by item name
   const trackedItemsList: TrackedItem[] = useMemo(() => {

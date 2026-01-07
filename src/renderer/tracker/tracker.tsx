@@ -11,9 +11,8 @@ import { getTrackableItems, getTotalCountNeeded, getKeepReasons } from "./utils"
 import { useOwnedItems } from "./hooks/useOwnedItems";
 import { MessageChannel, MessageType } from "../../main/services/MessageChannel";
 import { imageCacheService } from "../services/ImageCacheService";
-import { getItemsArray, shouldKeepForEvents } from "../../shared/utils";
+import { shouldKeepForEvents } from "../../shared/utils";
 import { createLogger } from '../../shared/services/Logger';
-import { itemsDataService } from "../../shared/services/ItemsDataService";
 import { releaseNotesService, ReleaseNoteEntry, RELEASE_NOTES_STORAGE_KEY } from '../services/ReleaseNotesService';
 import { ViewMode } from "../widgets/types";
 import { WidgetContainer } from "../widgets";
@@ -228,7 +227,7 @@ const Tracker: React.FC = () => {
     checkHotkeys();
   }, [isFTUEComplete]);
 
-  const allItems = useMemo(() => getItemsArray(), []);
+  const allItems = useMemo(() => [] as Item[], []);
   const allTrackableItems = useMemo(() => getTrackableItems(), []);
 
   const itemsToKeepCount = useMemo(() => {
@@ -1218,12 +1217,6 @@ const mountTracker = () => {
 };
 
 const bootstrap = async () => {
-  try {
-    await itemsDataService.init();
-  } catch (error) {
-    logger.error('Failed to initialize items data service before mounting tracker', error);
-  }
-
   mountTracker();
 };
 

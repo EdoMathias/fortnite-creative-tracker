@@ -1,5 +1,5 @@
 import { Item, KeepCategoryKey, KeepDetail } from "../../shared/types";
-import { getActiveEventRequirements, getItemsArray, getTotalCountNeeded } from "../../shared/utils";
+import { getActiveEventRequirements, getTotalCountNeeded } from "../../shared/utils";
 
 // Re-export getTotalCountNeeded for backward compatibility with tracker components
 export { getTotalCountNeeded };
@@ -20,14 +20,7 @@ export interface KeepReason {
  * Get all items that should be tracked (have keepForWorkshop, keepForQuests, or keepForProjects)
  */
 export const getTrackableItems = (): Item[] => {
-  const itemsArray = getItemsArray();
-  
-  return itemsArray.filter(item => 
-    item.keepForWorkshop.shouldKeep ||
-    item.keepForQuests.shouldKeep ||
-    item.keepForProjects.shouldKeep ||
-    getActiveEventRequirements(item).length > 0
-  );
+  return [];
 };
 
 /**
