@@ -14,7 +14,7 @@ interface ReleaseNotesApiResponse {
   };
 }
 
-export const RELEASE_NOTES_STORAGE_KEY = 'recycleme_release_notes_viewed';
+export const RELEASE_NOTES_STORAGE_KEY = 'fortnite_tracker_release_notes_viewed';
 
 const RELEASE_NOTES_BASE_URL = 'https://console-api.overwolf.com/v1/apps';
 const RELEASE_NOTES_APP_ID = 'flicmkjhlmjkhfjngkcggjhmddjneknbadaelkbh';

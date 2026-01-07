@@ -49,20 +49,16 @@ export const FTUEWelcomeModal: React.FC = () => {
         <div className="ftue-welcome-header">
           <h2>Welcome to Fortnite Map Tracker!</h2>
           <p className="ftue-welcome-subtitle">
-            Your companion for Arc Raiders to help you decide whether to sell, recycle, or keep your looted items.
-            <br />
-            <p className="ftue-welcome-subtitle">
-              You can always access this modal from the settings menu.
-            </p>
+            Track your Creative map sessions and discover trending maps.
           </p>
         </div>
 
         <div className="ftue-welcome-content">
           <div className="ftue-feature">
-            <div className="ftue-feature-icon">📊</div>
+            <div className="ftue-feature-icon">🗺️</div>
             <div className="ftue-feature-info">
-              <h3>Fortnite Map Tracker</h3>
-              <p>Track your owned items and mark completed stations</p>
+              <h3>Map Tracking</h3>
+              <p>See your playtime, top maps, and session statistics</p>
               <span>Show/Hide the window in-game with: </span>
               <div className="ftue-hotkey-badge">{hotkeys.trackMeIngame}</div>
               <br />

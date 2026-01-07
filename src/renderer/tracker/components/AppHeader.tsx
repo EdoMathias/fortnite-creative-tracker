@@ -2,7 +2,6 @@ import React from 'react';
 
 interface AppHeaderProps {
   hotkeyText: string;
-  itemCount: number;
   showHotkey?: boolean;
   onSettingsClick?: () => void;
   onSubmissionFormClick?: () => void;
@@ -10,7 +9,6 @@ interface AppHeaderProps {
 
 export const AppHeader: React.FC<AppHeaderProps> = ({ 
   hotkeyText, 
-  itemCount, 
   showHotkey = true,
   onSettingsClick,
   onSubmissionFormClick
@@ -19,13 +17,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     <header id="header" className="app-header">
       <img src="../../img/logo-icon.png" alt="Header icon" />
       <h1>Fortnite Map Tracker - Desktop</h1>
-      {showHotkey ? (
+      {showHotkey && (
         <h1 className="hotkey-text">
-          Show/Hide: <kbd id="hotkey">{hotkeyText}</kbd> • Tracking {itemCount} items
-        </h1>
-      ) : (
-        <h1 className="hotkey-text">
-          Tracking {itemCount} items
+          Show/Hide: <kbd id="hotkey">{hotkeyText}</kbd>
         </h1>
       )}
       <div className="header-actions-group">

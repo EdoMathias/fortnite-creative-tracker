@@ -140,7 +140,7 @@ export const GameTimeWidget: React.FC = () => {
     };
     window.addEventListener('gameTimeChanged', handleChange);
     window.addEventListener('storage', (e) => {
-      if (e.key === 'recycleme_game_time') {
+      if (e.key === 'fortnite_tracker_game_time') {
         gameTimeService.reloadData();
         updateStats();
       }

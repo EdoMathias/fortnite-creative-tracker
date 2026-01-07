@@ -12,7 +12,6 @@ export enum MessageType {
   CHECK_FTUE_STATUS = 'check-ftue-status',
   FTUE_STATUS_RESPONSE = 'ftue-status-response',
   HOTKEY_UPDATED = 'hotkey-updated',
-  SWITCH_VIEW_MODE = 'switch-view-mode',
   GAME_TIME_UPDATED = 'game-time-updated',
   CUSTOM = 'custom'
 }

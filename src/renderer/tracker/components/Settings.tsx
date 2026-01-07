@@ -4,34 +4,19 @@ import { useFTUE } from '../../contexts/FTUEContext';
 import HotKeysSettings from './Hotkeys';
 
 interface SettingsProps {
-  onResetProgression: () => void;
   onResetGameTimeStats?: () => void;
   onClose: () => void;
   initialTab?: 'general' | 'hotkeys' | 'data' | 'about';
 }
 
-export const Settings: React.FC<SettingsProps> = ({ onResetProgression, onResetGameTimeStats, onClose, initialTab = 'general' }) => {
-  const [showResetModal, setShowResetModal] = useState<boolean>(false);
+export const Settings: React.FC<SettingsProps> = ({ onResetGameTimeStats, onClose, initialTab = 'general' }) => {
   const [showResetGameTimeModal, setShowResetGameTimeModal] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'general' | 'hotkeys' | 'data' | 'about'>(initialTab);
-  const { resetFTUE, resetStep } = useFTUE();
+  const { resetFTUE } = useFTUE();
 
   const handleResetFTUE = () => {
     resetFTUE();
     onClose?.();
-  };
-
-  const handleResetClick = () => {
-    setShowResetModal(true);
-  };
-
-  const handleConfirmReset = () => {
-    onResetProgression();
-    setShowResetModal(false);
-  };
-
-  const handleCancelReset = () => {
-    setShowResetModal(false);
   };
 
   const handleResetGameTimeClick = () => {
@@ -60,16 +45,6 @@ export const Settings: React.FC<SettingsProps> = ({ onResetProgression, onResetG
                   onClick={handleResetFTUE}
                 >
                   Reset Tutorial
-                </Button>
-                <div style={{ height: '8px' }} />
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    resetStep('auto_complete_quests');
-                    onClose?.();
-                  }}
-                >
-                  Auto Complete Quests
                 </Button>
               </div>
             </div>
@@ -113,14 +88,6 @@ export const Settings: React.FC<SettingsProps> = ({ onResetProgression, onResetG
           <>
             <div className="settings-main">
               <div className="settings-section">
-                <h3 className="settings-section-title">Progression</h3>
-                <Button
-                  variant="danger"
-                  onClick={handleResetClick}
-                >
-                  Reset Progression
-                </Button>
-                <div style={{ height: '16px' }} />
                 <h3 className="settings-section-title">Game Time Stats</h3>
                 <Button
                   variant="danger"
@@ -132,30 +99,16 @@ export const Settings: React.FC<SettingsProps> = ({ onResetProgression, onResetG
             </div>
             <div className="settings-info">
               <h3>Data Management</h3>
-              <p>Manage your saved data and progression.</p>
-
-              <h4>Reset Progression</h4>
-              <p>
-                This will completely wipe all your tracked data, including:
-              </p>
-              <ul>
-                <li>Tracked item counts</li>
-                <li>Completed quests</li>
-                <li>Station upgrades</li>
-                <li>Project progress</li>
-              </ul>
-              <p className="warning-text">
-                <strong>Warning:</strong> This action cannot be undone.
-              </p>
+              <p>Manage your saved data and statistics.</p>
 
               <h4>Reset Game Time Stats</h4>
               <p>
                 This will reset all game time statistics, including:
               </p>
               <ul>
-                <li>Time spent in raids</li>
+                <li>Time spent in maps</li>
                 <li>Time spent in lobby</li>
-                <li>Total raids played counter</li>
+                <li>Total sessions counter</li>
               </ul>
               <p className="warning-text">
                 <strong>Warning:</strong> This action cannot be undone.
@@ -170,7 +123,7 @@ export const Settings: React.FC<SettingsProps> = ({ onResetProgression, onResetG
               <div className="settings-section">
                 <h3 className="settings-section-title">About Fortnite Map Tracker</h3>
                 <p className="settings-section-description">
-                  Fortnite Map Tracker is an unofficial tracker for Fortnite, designed to help you track 
+                  Fortnite Map Tracker is an unofficial tracker for Fortnite Creative, designed to help you track 
                   previously played maps and modes and how long you've spent in each.
                 </p>
 
@@ -188,30 +141,10 @@ export const Settings: React.FC<SettingsProps> = ({ onResetProgression, onResetG
                       fontSize: "12px",
                       color: "var(--muted-foreground)",
                       fontStyle: "italic",
-                      marginBottom: "16px",
                     }}
                   >
-                    "Arc Raiders™ and all related game content — including mechanics, items, names, and imagery — are
-                    © Embark Studios AB. This application is a fan-made project and is not affiliated with, endorsed,
-                    or sponsored by Embark Studios AB."
-                  </p>
-
-                  {/* DATA ATTRIBUTION */}
-                  <p style={{ fontSize: "13px", marginBottom: "4px" }}>
-                    Data and item information sourced from{" "}
-                    <a
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        overwolf.utils.openUrlInDefaultBrowser(
-                          "https://github.com/RaidTheory/arcraiders-data"
-                        );
-                      }}
-                      style={{ color: "rgba(6, 182, 212, 1)", textDecoration: "none" }}
-                    >
-                      RaidTheory/arcraiders-data
-                    </a>{" "}
-                    © RaidTheory (MIT License).
+                    "Fortnite® is a registered trademark of Epic Games, Inc. This application is a fan-made project 
+                    and is not affiliated with, endorsed, or sponsored by Epic Games, Inc."
                   </p>
                 </div>
               </div>
@@ -224,7 +157,7 @@ export const Settings: React.FC<SettingsProps> = ({ onResetProgression, onResetG
               <h4>Disclaimer</h4>
               <p>
                 This application is a community-made fan project and is not affiliated with, endorsed, or sponsored
-                by Embark Studios AB or the developers of Arc Raiders.
+                by Epic Games, Inc. or the developers of Fortnite.
               </p>
             </div>
           </>
@@ -276,16 +209,6 @@ export const Settings: React.FC<SettingsProps> = ({ onResetProgression, onResetG
         </div>
       </div>
 
-      <Modal
-        isOpen={showResetModal}
-        title="Reset Progression"
-        message="Are you sure you want to reset all progression? This will clear all your quests, stations, and project progression. This action cannot be undone."
-        confirmLabel="Reset"
-        cancelLabel="Cancel"
-        onConfirm={handleConfirmReset}
-        onCancel={handleCancelReset}
-        variant="danger"
-      />
       <Modal
         isOpen={showResetGameTimeModal}
         title="Reset Game Time Stats"

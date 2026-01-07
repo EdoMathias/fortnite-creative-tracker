@@ -4,7 +4,6 @@ interface AppHeaderProps {
   title: string;
   appVersion?: string;
   hotkeyText?: string;
-  itemCount?: number;
   showHotkey?: boolean;
   actionButtons?: Array<{
     icon: string;
@@ -17,7 +16,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   title,
   appVersion,
   hotkeyText,
-  itemCount,
   showHotkey = true,
   actionButtons = []
 }) => {
@@ -30,23 +28,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           <span className="app-version-tag">v{appVersion}</span>
         )}
       </h1>
-      {showHotkey && hotkeyText ? (
+      {showHotkey && hotkeyText && (
         <h1 className="hotkey-text">
-          {itemCount !== undefined ? (
-            <>
-              Show/Hide: <kbd id="hotkey">{hotkeyText}</kbd> • Tracking {itemCount} items
-            </>
-          ) : (
-            <>
-              Show/Hide: <kbd id="hotkey">{hotkeyText}</kbd>
-            </>
-          )}
+          Show/Hide: <kbd id="hotkey">{hotkeyText}</kbd>
         </h1>
-      ) : itemCount !== undefined ? (
-        <h1 className="hotkey-text">
-          Tracking {itemCount} items
-        </h1>
-      ) : null}
+      )}
       {actionButtons.length > 0 && (
         <div className="header-actions-group">
           {actionButtons.map((button, index) => (

@@ -3,7 +3,7 @@ import { GameTimeStats } from '../types';
 
 const logger = createLogger('GameTimeService');
 
-const STORAGE_KEY = 'recycleme_game_time';
+const STORAGE_KEY = 'fortnite_tracker_game_time';
 
 interface GameTimeData {
   raidTime: number; // total seconds in raid
