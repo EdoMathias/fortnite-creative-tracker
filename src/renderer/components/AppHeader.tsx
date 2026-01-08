@@ -41,6 +41,33 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     }
   }, []);
 
+  const handleMinimize = useCallback(() => {
+    if (windowRef.current) {
+      windowRef.current.minimize().catch((error) => {
+        console.error('Error minimizing window:', error);
+      });
+    }
+  }, []);
+
+  const handleRestore = useCallback(async () => {
+    if (windowRef.current) {
+      const windowState = await windowRef.current.getWindowState();
+      if (windowState === 'maximized') {
+        await windowRef.current.restore();
+      } else {
+        await windowRef.current.maximize();
+      }
+    }
+  }, []);
+
+  const handleClose = useCallback(() => {
+    if (windowRef.current) {
+      windowRef.current.close().catch((error) => {
+        console.error('Error closing window:', error);
+      });
+    }
+  }, []);
+
   return (
     <header id="header" className="app-header" onMouseDown={handleDragStart}>
       <img src="../../img/logo-icon.png" alt="Header icon" />
@@ -71,9 +98,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         </div>
       )}
       <div className="window-controls-group" onMouseDown={(e) => e.stopPropagation()}>
-        <button id="minimizeButton" className="window-control window-control-minimize" />
-        <button id="maximizeButton" className="window-control window-control-maximize" />
-        <button id="closeButton" className="window-control window-control-close" />
+        <button id="minimizeButton" className="window-control window-control-minimize" onClick={handleMinimize} />
+        <button id="maximizeButton" className="window-control window-control-maximize" onClick={handleRestore} />
+        <button id="closeButton" className="window-control window-control-close" onClick={handleClose} />
       </div>
     </header>
   );
