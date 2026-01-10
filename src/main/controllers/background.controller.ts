@@ -73,12 +73,12 @@ export class BackgroundController {
   private async handleGameStateChange(isRunning: boolean, gameInfo?: overwolf.games.RunningGameInfo): Promise<void> {
     if (isRunning) {
       await this._windowsController.onGameLaunch();
-      // await this._gameEventsService.onGameLaunched(undefined, gameInfo);
+      await this._gameEventsService.onGameLaunched(undefined, gameInfo);
       this._isGameRunning = true;
     } else {
       // Change later to primary
       await this._windowsController.showTrackerDesktopWindow('secondary');
-      // this._gameEventsService.onGameClosed();
+      this._gameEventsService.onGameClosed();
       this._isGameRunning = false;
     }
   }

@@ -5,7 +5,7 @@ export const kGamesFeatures = new Map<number, string[]>([
   [
     FORTNITE_GAME_ID,
     [
-      'match_info','game_info'
+      'map'
     ]
   ],
   // Guild Wars (for debugging faster)
@@ -37,3 +37,12 @@ export type HotkeyData = {
   virtualKeycode: number;
 }
 
+export const kBaseCreativeMapsUrl = 'https://play.fn.gg/island';
+
+export interface MapData {
+  map_id: string;
+  title?: string;
+  thumbnail?: string;
+  playCount?: number;
+  lastPlayed?: string;
+}

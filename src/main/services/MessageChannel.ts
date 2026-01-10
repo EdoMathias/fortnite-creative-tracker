@@ -7,6 +7,7 @@ const logger = createLogger('MessageChannel');
  * Message types that can be sent between windows
  */
 export enum MessageType {
+  MAP_UPDATED = 'map-updated',
   GAME_STATE_CHANGED = 'game-state-changed',
   TRACKER_WINDOW_SWITCHED = 'tracker-window-switched',
   CHECK_FTUE_STATUS = 'check-ftue-status',

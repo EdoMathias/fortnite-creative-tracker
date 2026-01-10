@@ -9,23 +9,20 @@ import { MessageChannel, MessageType } from "../../main/services/MessageChannel"
 import { createLogger } from '../../shared/services/Logger';
 import { releaseNotesService, ReleaseNoteEntry, RELEASE_NOTES_STORAGE_KEY } from '../services/ReleaseNotesService';
 import { WidgetContainer } from "../widgets";
-import { ViewMode } from "../widgets/types";
 import { gameTimeService } from "../../shared/services/GameTimeService";
 import "../styles/styles.css";
 import { useAppVersion } from '../hooks/useAppVersion';
 import { useWindowInfo } from '../hooks/useWindowInfo';
+import Overview from "./views/Overview";
+import { useMapsData } from '../hooks/useMapsData';
+import TopMaps from './views/TopMaps';
+import useViewMode from '../hooks/useViewMode';
+import Dashboards from './views/Dashboards';
+import Recommendations from './views/Recommendations';
 
 const logger = createLogger('Tracker');
 
-const VIEW_MODE_STORAGE_KEY = 'fortnite_tracker_view_mode';
-
-const VIEW_TABS: { mode: ViewMode; label: string; icon: string }[] = [
-  { mode: 'overview', label: 'Overview', icon: '🏠' },
-  { mode: 'top-maps', label: 'Top Maps', icon: '🗺️' },
-  { mode: 'dashboards', label: 'Dashboards', icon: '📊' },
-  { mode: 'recommendations', label: 'Recommendations', icon: '💡' },
-  { mode: 'widgets', label: 'Widgets', icon: '🧩' },
-];
+const trackerMessageChannel = new MessageChannel();
 
 const Tracker: React.FC = () => {
   const { isIngameWindow } = useWindowInfo();
@@ -38,23 +35,13 @@ const Tracker: React.FC = () => {
   const { isFTUEComplete } = useFTUE();
   const [showHotkeyWarning, setShowHotkeyWarning] = useState<boolean>(false);
   const [unassignedHotkeys, setUnassignedHotkeys] = useState<string[]>([]);
-  const [viewMode, setViewMode] = useState<ViewMode>(() => {
-    try {
-      const stored = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
-      if (stored && VIEW_TABS.some(tab => tab.mode === stored)) {
-        return stored as ViewMode;
-      }
-    } catch (error) {
-      logger.error('Error loading view mode:', error);
-    }
-    return 'overview';
-  });
+  
+  const mapsData = useMapsData();
+  const { viewMode, handleViewModeChange, VIEW_MODE_TABS } = useViewMode();
 
   // Listen for game time updates from background
   useEffect(() => {
-    const messageChannel = new MessageChannel();
-
-    const unregisterGameTime = messageChannel.onMessage(MessageType.GAME_TIME_UPDATED, (payload) => {
+    const unregisterGameTime = trackerMessageChannel.onMessage(MessageType.GAME_TIME_UPDATED, (payload) => {
       logger.debug('Received GAME_TIME_UPDATED message:', payload);
       // Reload GameTimeService data from localStorage to get latest session info
       gameTimeService.reloadData();
@@ -66,6 +53,19 @@ const Tracker: React.FC = () => {
 
     return () => {
       unregisterGameTime();
+    };
+  }, []);
+
+  // Listen for map updates from background
+  useEffect(() => {
+    const unregisterMapUpdate = trackerMessageChannel.onMessage(MessageType.MAP_UPDATED, (payload) => {
+      logger.log('Received MAP_UPDATED message:', payload);
+
+      mapsData.handleMapUpdate(payload.data);
+    });
+
+    return () => {
+      unregisterMapUpdate();
     };
   }, []);
 
@@ -226,15 +226,6 @@ const Tracker: React.FC = () => {
     }
   };
 
-  const handleViewModeChange = (mode: ViewMode) => {
-    setViewMode(mode);
-    try {
-      localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
-    } catch (error) {
-      logger.error('Error saving view mode:', error);
-    }
-  };
-
   const headerActionButtons: Array<{ icon: string; title: string; onClick: () => void }> = [
     ...(releaseNotesEntry && isFTUEComplete
       ? [
@@ -282,7 +273,7 @@ const Tracker: React.FC = () => {
             ) : (
               <>
                 <div className="view-mode-tabs">
-                  {VIEW_TABS.map(tab => (
+                  {VIEW_MODE_TABS && VIEW_MODE_TABS.map(tab => (
                     <button
                       key={tab.mode}
                       onClick={() => handleViewModeChange(tab.mode)}
@@ -295,80 +286,19 @@ const Tracker: React.FC = () => {
 
                 <div className="view-content">
                   {viewMode === 'overview' && (
-                    <div className="overview-container">
-                      {/* Row 1: Stats tiles */}
-                      <div className="overview-stats-row">
-                        <div className="overview-tile overview-tile-stat">
-                          <div className="overview-tile-icon">⏱️</div>
-                          <div className="overview-tile-content">
-                            <div className="overview-tile-value">--:--</div>
-                            <div className="overview-tile-label">Total Playtime</div>
-                          </div>
-                        </div>
-                        <div className="overview-tile overview-tile-stat">
-                          <div className="overview-tile-icon">🗺️</div>
-                          <div className="overview-tile-content">
-                            <div className="overview-tile-value">--</div>
-                            <div className="overview-tile-label">Maps Played</div>
-                          </div>
-                        </div>
-                        <div className="overview-tile overview-tile-stat">
-                          <div className="overview-tile-icon">📊</div>
-                          <div className="overview-tile-content">
-                            <div className="overview-tile-value">--:--</div>
-                            <div className="overview-tile-label">Avg Session</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Row 2: Top played maps */}
-                      <div className="overview-tile overview-tile-wide">
-                        <div className="overview-tile-header">
-                          <h3>🏆 Top Played Maps</h3>
-                        </div>
-                        <div className="overview-maps-list">
-                          <div className="overview-map-item overview-map-empty">
-                            <span className="overview-map-empty-text">No map data yet</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Row 3: Recent maps */}
-                      <div className="overview-tile overview-tile-wide">
-                        <div className="overview-tile-header">
-                          <h3>🕐 Recent Maps</h3>
-                        </div>
-                        <div className="overview-maps-list">
-                          <div className="overview-map-item overview-map-empty">
-                            <span className="overview-map-empty-text">No recent maps</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    <Overview />
                   )}
 
                   {viewMode === 'top-maps' && (
-                    <div className="view-placeholder">
-                      <div className="view-placeholder-icon">🗺️</div>
-                      <h2>Top Maps</h2>
-                      <p>Discover the most popular and trending Creative maps to play and explore.</p>
-                    </div>
+                    <TopMaps />
                   )}
 
                   {viewMode === 'dashboards' && (
-                    <div className="view-placeholder">
-                      <div className="view-placeholder-icon">📊</div>
-                      <h2>Dashboards</h2>
-                      <p>View detailed analytics and statistics about your gameplay and progress.</p>
-                    </div>
+                    <Dashboards />
                   )}
 
                   {viewMode === 'recommendations' && (
-                    <div className="view-placeholder">
-                      <div className="view-placeholder-icon">💡</div>
-                      <h2>Recommendations</h2>
-                      <p>Get personalized suggestions for maps, challenges, and items based on your activity.</p>
-                    </div>
+                    <Recommendations />
                   )}
 
                   {viewMode === 'widgets' && (
