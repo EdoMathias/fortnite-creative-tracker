@@ -1,0 +1,40 @@
+/* TrendMini.module.css - CSS Module Example */
+
+.container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chart {
+  width: 280px;
+  height: 60px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.chart canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.up {
+  color: rgba(45, 244, 167, 0.95);
+}
+
+.down {
+  color: rgba(255, 91, 122, 0.95);
+}
+
+.flat {
+  color: rgba(255, 255, 255, 0.6);
+}

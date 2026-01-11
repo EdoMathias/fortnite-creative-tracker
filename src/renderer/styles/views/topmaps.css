@@ -1,0 +1,229 @@
+/* =========================
+   Top Maps Page
+   ========================= */
+
+.topmaps-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px;
+}
+
+/* ------------------------------
+   Header
+--------------------------------*/
+
+.topmaps-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.topmaps-header .title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.topmaps-header .subtitle {
+  margin-top: 2px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ------------------------------
+   Range Selector
+--------------------------------*/
+
+.range-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 360px;
+}
+
+.range-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.range-selector {
+  display: flex;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.range-btn {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.7);
+
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease,
+    border-color 120ms ease, color 120ms ease;
+  user-select: none;
+}
+
+.range-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(45, 244, 167, 0.35);
+  transform: translateY(-1px);
+}
+
+.range-btn.active {
+  background: rgba(45, 244, 167, 0.14);
+  border-color: rgba(45, 244, 167, 0.55);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* =========================
+   Grid Table
+   ========================= */
+
+.maps-grid {
+  display: grid;
+  grid-template-columns: 90px 1.5fr 200px 340px 120px;
+  align-items: center;
+  gap: 18px;
+}
+
+.maps-grid--header {
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.maps-grid--row {
+  padding: 14px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+}
+
+.maps-grid--row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ------------------------------
+   Grid Columns
+--------------------------------*/
+
+.col-rank {
+  font-size: 18px;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.col-map .map-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.col-map .map-code {
+  margin-top: 2px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.col-time .time-value {
+  font-size: 16px;
+  font-weight: 900;
+  color: rgba(45, 244, 167, 0.95);
+}
+
+.col-time .time-sub {
+  margin-top: 2px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.col-trend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* ------------------------------
+   Play Button
+--------------------------------*/
+
+.play-btn {
+  width: fit-content;
+  padding: 8px 12px;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease,
+    transform 120ms ease;
+}
+
+.play-btn:hover {
+  background: rgba(45, 244, 167, 0.1);
+  border-color: rgba(45, 244, 167, 0.45);
+  transform: translateY(-1px);
+}
+
+/* =========================
+   TrendMini
+   ========================= */
+
+.trend-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trend-line-chart {
+  width: 280px;
+  height: 60px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.trend-line-chart canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.trend-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.trend-meta.up {
+  color: rgba(45, 244, 167, 0.95);
+}
+
+.trend-meta.down {
+  color: rgba(255, 91, 122, 0.95);
+}
+
+.trend-meta.flat {
+  color: rgba(255, 255, 255, 0.6);
+}

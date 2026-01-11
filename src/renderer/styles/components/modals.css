@@ -1,0 +1,215 @@
+/* ------------------------------
+   Modal Base Styles
+--------------------------------*/
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-overlay--content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: var(--radius);
+}
+
+.modal-content {
+  background-color: #0c1327;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-title {
+  font-family: var(--font-ark);
+  font-size: 18px;
+  font-weight: var(--font-weight-medium);
+  color: var(--foreground);
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modal-message {
+  font-family: var(--font-ark);
+  font-size: 14px;
+  color: var(--muted-foreground);
+  margin: 0 0 24px 0;
+  line-height: 1.6;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.modal-button {
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-family: var(--font-ark);
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid;
+}
+
+.modal-button-cancel {
+  background-color: transparent;
+  border-color: var(--border);
+  color: var(--muted-foreground);
+}
+
+.modal-button-cancel:hover {
+  background-color: rgba(6, 182, 212, 0.1);
+  border-color: rgba(6, 182, 212, 0.3);
+  color: rgba(6, 182, 212, 1);
+}
+
+.modal-button-confirm {
+  background-color: rgba(212, 6, 6, 0.1);
+  border-color: rgba(212, 6, 6, 0.3);
+  color: rgba(212, 6, 6, 1);
+}
+
+.modal-button-confirm:hover {
+  background-color: rgba(212, 6, 6, 0.2);
+  border-color: rgba(212, 6, 6, 0.5);
+  box-shadow: 0 0 8px rgba(212, 6, 6, 0.2);
+}
+
+.modal-button-danger {
+  background-color: rgba(212, 6, 6, 0.1) !important;
+  border-color: rgba(212, 6, 6, 0.3) !important;
+  color: rgba(212, 6, 6, 1) !important;
+}
+
+.modal-button:active {
+  transform: scale(0.95);
+}
+
+/* ------------------------------
+   Release Notes Modal
+--------------------------------*/
+
+.release-notes-modal {
+  max-width: 640px;
+  width: min(640px, 90vw);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.release-notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.release-notes-eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.release-notes-title {
+  margin: 4px 0 0 0;
+  font-size: 22px;
+  color: var(--foreground);
+}
+
+.release-notes-badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(212, 6, 6, 0.15);
+  border: 1px solid rgba(212, 6, 6, 0.4);
+  color: rgba(255, 204, 204, 1);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.release-notes-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--muted-foreground);
+  font-family: var(--font-ark);
+  line-height: 1.6;
+}
+
+.release-notes-body h1,
+.release-notes-body h2,
+.release-notes-body h3,
+.release-notes-body h4 {
+  color: var(--foreground);
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.release-notes-body p {
+  margin-bottom: 1em;
+}
+
+.release-notes-body ul,
+.release-notes-body ol {
+  padding-left: 1.25em;
+  margin-bottom: 1em;
+}
+
+.release-notes-body li {
+  margin-bottom: 0.4em;
+}
+
+.release-notes-body img,
+.release-notes-body video {
+  max-width: 100%;
+  border-radius: 6px;
+  margin: 10px 0;
+}
+
+.release-notes-body figure {
+  margin: 0;
+}
+
+.release-notes-body strong {
+  color: rgba(255, 255, 255, 0.95);
+}

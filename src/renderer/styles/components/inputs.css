@@ -1,0 +1,334 @@
+/* ------------------------------
+   Search Bar
+--------------------------------*/
+
+.tracker-search-bar-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 20px;
+}
+
+.tracker-search-bar {
+  width: 100%;
+  padding: 12px 16px 12px 48px;
+  font-size: 16px;
+  border: 1px solid rgba(52, 211, 153, 0.5);
+  border-radius: var(--radius);
+  background-color: #0c1327;
+  color: var(--foreground);
+  outline: none;
+  transition: all 0.2s;
+  font-family: var(--font-ark);
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.2);
+}
+
+.tracker-search-bar:focus {
+  border-color: rgba(52, 211, 153, 0.8);
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.4);
+}
+
+.tracker-search-bar::placeholder {
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 14px;
+}
+
+.tracker-search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(52, 211, 153, 0.8));
+  z-index: 1;
+}
+
+.tracker-search-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: rgba(52, 211, 153, 1);
+}
+
+.tracker-search-clear-btn {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  background-color: rgba(52, 211, 153, 0.1);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  border-radius: 4px;
+  color: rgba(52, 211, 153, 1);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 1;
+}
+
+.tracker-search-clear-btn:hover {
+  background-color: rgba(52, 211, 153, 0.2);
+  border-color: rgba(52, 211, 153, 0.5);
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.3);
+}
+
+.tracker-search-clear-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.tracker-search-shortcut {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px 8px;
+  background-color: rgba(52, 211, 153, 0.05);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: 4px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  font-family: var(--font-ark);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ------------------------------
+   Amount Input
+--------------------------------*/
+
+.tracker-amount-input-form {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.tracker-amount-input {
+  width: 60px;
+  padding: 6px 8px;
+  background-color: #0c1327;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-family: var(--font-ark);
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.tracker-amount-input:focus {
+  border-color: rgba(6, 182, 212, 0.6);
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.2);
+}
+
+.tracker-amount-submit,
+.tracker-amount-cancel {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background-color: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 4px;
+  color: rgba(6, 182, 212, 1);
+  font-family: var(--font-ark);
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tracker-amount-submit:hover {
+  background-color: rgba(30, 255, 0, 0.2);
+  border-color: rgba(30, 255, 0, 0.5);
+  color: rgba(30, 255, 0, 1);
+}
+
+.tracker-amount-cancel:hover {
+  background-color: rgba(212, 6, 6, 0.2);
+  border-color: rgba(212, 6, 6, 0.5);
+  color: rgba(212, 6, 6, 1);
+}
+
+.tracker-custom-amount-input {
+  width: 100%;
+  padding: 8px 12px;
+  background-color: #0c1327;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-family: var(--font-ark);
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  outline: none;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.tracker-custom-amount-input:focus {
+  border-color: rgba(6, 182, 212, 0.6);
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.2);
+}
+
+/* ------------------------------
+   Hotkey Input
+--------------------------------*/
+
+.hotkey-input-group {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.hotkey-input {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.hotkey-input label {
+  font-family: var(--font-ark);
+  font-size: 14px;
+  color: var(--foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: var(--font-weight-medium);
+  min-width: 180px;
+  flex-shrink: 0;
+}
+
+.hotkey-input label span {
+  display: inline;
+}
+
+.hotkey-input input {
+  width: 200px;
+  max-width: 200px;
+  padding: 8px 12px;
+  background-color: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-family: var(--font-ark);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  outline: none;
+}
+
+.hotkey-input input:hover:not(:focus) {
+  background-color: rgba(6, 182, 212, 0.15);
+  border-color: rgba(6, 182, 212, 0.5);
+}
+
+.hotkey-input input:focus {
+  background-color: rgba(6, 182, 212, 0.2);
+  border-color: rgba(6, 182, 212, 0.8);
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
+  cursor: text;
+}
+
+.hotkey-input input::placeholder {
+  color: var(--muted-foreground);
+  opacity: 0.6;
+  font-style: italic;
+}
+
+.hotkey-input-editing {
+  background-color: rgba(6, 182, 212, 0.2);
+  border-color: rgba(6, 182, 212, 0.8);
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
+  cursor: text;
+  outline: none;
+}
+
+.hotkey-input-unset {
+  opacity: 0.6;
+  font-style: italic;
+}
+
+.hotkey-error {
+  margin-top: 6px;
+  padding: 8px 12px;
+  background-color: rgba(212, 6, 6, 0.1);
+  border: 1px solid rgba(212, 6, 6, 0.3);
+  border-radius: 4px;
+  color: rgba(212, 6, 6, 1);
+  font-family: var(--font-ark);
+  font-size: 12px;
+  line-height: 1.4;
+  animation: hotkey-error-appear 0.2s ease-out;
+}
+
+@keyframes hotkey-error-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hotkey-unassign-button {
+  background-color: rgba(212, 6, 6, 0.1);
+  border: 1px solid rgba(212, 6, 6, 0.3);
+  border-radius: 4px;
+  color: rgba(212, 6, 6, 1);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
+  transition: all 0.15s ease-in-out;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.hotkey-unassign-button:hover {
+  background-color: rgba(212, 6, 6, 0.2);
+  border-color: rgba(212, 6, 6, 0.5);
+  box-shadow: 0 0 8px rgba(212, 6, 6, 0.2);
+}
+
+.hotkey-unassign-button:active {
+  transform: scale(0.95);
+}
+
+.hotkey-unassign-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background-color: rgba(128, 128, 128, 0.1);
+  border-color: rgba(128, 128, 128, 0.3);
+  color: rgba(128, 128, 128, 0.6);
+}
+
+.hotkey-unassign-button:disabled:hover {
+  background-color: rgba(128, 128, 128, 0.1);
+  border-color: rgba(128, 128, 128, 0.3);
+  box-shadow: none;
+  transform: none;
+}

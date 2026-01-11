@@ -1,21 +1,33 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
-import { OWHotkeys } from "@overwolf/overwolf-api-ts";
-import { kHotkeys, kGameClassIds } from "../../shared/consts";
-import { AppHeader, FTUEWelcomeModal, UnassignedHotkeyModal, ReleaseNotesModal } from "../components";
-import { FTUEProvider, useFTUE } from "../contexts/FTUEContext";
-import { AdContainer, Settings } from "./components";
-import { MessageChannel, MessageType } from "../../main/services/MessageChannel";
+import { OWHotkeys } from '@overwolf/overwolf-api-ts';
+import { kHotkeys, kGameClassIds } from '../../shared/consts';
+import {
+  AppHeader,
+  FTUEWelcomeModal,
+  UnassignedHotkeyModal,
+  ReleaseNotesModal,
+} from '../components';
+import { FTUEProvider, useFTUE } from '../contexts/FTUEContext';
+import { AdContainer, Settings } from './components';
+import {
+  MessageChannel,
+  MessageType,
+} from '../../main/services/MessageChannel';
 import { createLogger } from '../../shared/services/Logger';
-import { releaseNotesService, ReleaseNoteEntry, RELEASE_NOTES_STORAGE_KEY } from '../services/ReleaseNotesService';
-import { WidgetContainer } from "../widgets";
-import { gameTimeService } from "../../shared/services/GameTimeService";
-import "../styles/styles.css";
+import {
+  releaseNotesService,
+  ReleaseNoteEntry,
+  RELEASE_NOTES_STORAGE_KEY,
+} from '../services/ReleaseNotesService';
+import { WidgetContainer } from '../widgets';
+import { gameTimeService } from '../../shared/services/GameTimeService';
+import '../styles/index.css';
 import { useAppVersion } from '../hooks/useAppVersion';
 import { useWindowInfo } from '../hooks/useWindowInfo';
-import Overview from "./views/Overview";
+import Overview from './views/Overview';
 import { useMapsData } from '../hooks/useMapsData';
-import TopMaps from './views/TopMaps';
+import { TopMapsPage } from './views/TopMaps/TopMaps';
 import useViewMode from '../hooks/useViewMode';
 import Dashboards from './views/Dashboards';
 import Recommendations from './views/Recommendations';
@@ -28,26 +40,33 @@ const Tracker: React.FC = () => {
   const { isIngameWindow } = useWindowInfo();
   const [hotkeyText, setHotkeyText] = useState<string>('');
   const [showSettings, setShowSettings] = useState<boolean>(false);
-  const [settingsInitialTab, setSettingsInitialTab] = useState<'general' | 'hotkeys' | 'data' | 'about'>('general');
-  const [releaseNotesEntry, setReleaseNotesEntry] = useState<ReleaseNoteEntry | null>(null);
-  const [isReleaseNotesModalOpen, setIsReleaseNotesModalOpen] = useState<boolean>(false);
+  const [settingsInitialTab, setSettingsInitialTab] = useState<
+    'general' | 'hotkeys' | 'data' | 'about'
+  >('general');
+  const [releaseNotesEntry, setReleaseNotesEntry] =
+    useState<ReleaseNoteEntry | null>(null);
+  const [isReleaseNotesModalOpen, setIsReleaseNotesModalOpen] =
+    useState<boolean>(false);
   const [releaseNotesViewed, setReleaseNotesViewed] = useState<boolean>(false);
   const { isFTUEComplete } = useFTUE();
   const [showHotkeyWarning, setShowHotkeyWarning] = useState<boolean>(false);
   const [unassignedHotkeys, setUnassignedHotkeys] = useState<string[]>([]);
-  
+
   const mapsData = useMapsData();
   const { viewMode, handleViewModeChange, VIEW_MODE_TABS } = useViewMode();
 
   // Listen for game time updates from background
   useEffect(() => {
-    const unregisterGameTime = trackerMessageChannel.onMessage(MessageType.GAME_TIME_UPDATED, (payload) => {
-      logger.debug('Received GAME_TIME_UPDATED message:', payload);
-      // Reload GameTimeService data from localStorage to get latest session info
-      gameTimeService.reloadData();
-      // Trigger custom event to update widgets
-      window.dispatchEvent(new Event('gameTimeChanged'));
-    });
+    const unregisterGameTime = trackerMessageChannel.onMessage(
+      MessageType.GAME_TIME_UPDATED,
+      (payload) => {
+        logger.debug('Received GAME_TIME_UPDATED message:', payload);
+        // Reload GameTimeService data from localStorage to get latest session info
+        gameTimeService.reloadData();
+        // Trigger custom event to update widgets
+        window.dispatchEvent(new Event('gameTimeChanged'));
+      }
+    );
 
     logger.debug('Registered message handler for GAME_TIME_UPDATED');
 
@@ -58,11 +77,14 @@ const Tracker: React.FC = () => {
 
   // Listen for map updates from background
   useEffect(() => {
-    const unregisterMapUpdate = trackerMessageChannel.onMessage(MessageType.MAP_UPDATED, (payload) => {
-      logger.log('Received MAP_UPDATED message:', payload);
+    const unregisterMapUpdate = trackerMessageChannel.onMessage(
+      MessageType.MAP_UPDATED,
+      (payload) => {
+        logger.log('Received MAP_UPDATED message:', payload);
 
-      mapsData.handleMapUpdate(payload.data);
-    });
+        mapsData.handleMapUpdate(payload.data);
+      }
+    );
 
     return () => {
       unregisterMapUpdate();
@@ -81,8 +103,11 @@ const Tracker: React.FC = () => {
           const gameHotkeys = result.games[kGameClassIds[0]];
           const unassigned = gameHotkeys
             .filter((hotkey: any) => {
-                logger.log(`Hotkey ${hotkey.name} unassigned?`, hotkey.IsUnassigned);
-                return hotkey.IsUnassigned;
+              logger.log(
+                `Hotkey ${hotkey.name} unassigned?`,
+                hotkey.IsUnassigned
+              );
+              return hotkey.IsUnassigned;
             })
             .map((hotkey: any) => hotkey.title);
 
@@ -114,7 +139,9 @@ const Tracker: React.FC = () => {
     let isDisposed = false;
 
     const loadReleaseNotes = async () => {
-      const entry = await releaseNotesService.getReleaseNoteForVersion(appVersion);
+      const entry = await releaseNotesService.getReleaseNoteForVersion(
+        appVersion
+      );
       if (isDisposed) {
         return;
       }
@@ -147,7 +174,8 @@ const Tracker: React.FC = () => {
     }
 
     const syncViewedState = () => {
-      const viewed = releaseNotesService.hasViewedReleaseNote(releaseNotesEntry);
+      const viewed =
+        releaseNotesService.hasViewedReleaseNote(releaseNotesEntry);
       setReleaseNotesViewed(viewed);
       if (viewed) {
         setIsReleaseNotesModalOpen(false);
@@ -170,7 +198,10 @@ const Tracker: React.FC = () => {
 
     return () => {
       window.removeEventListener('storage', handleStorageEvent);
-      window.removeEventListener('localStorageChange', handleCustomStorageChange);
+      window.removeEventListener(
+        'localStorageChange',
+        handleCustomStorageChange
+      );
     };
   }, [releaseNotesEntry]);
 
@@ -178,18 +209,23 @@ const Tracker: React.FC = () => {
   useEffect(() => {
     const setToggleHotkeyText = async () => {
       try {
-        const text = await OWHotkeys.getHotkeyText(kHotkeys.toggleTrackerIngameWindow, kGameClassIds[0]);
+        const text = await OWHotkeys.getHotkeyText(
+          kHotkeys.toggleTrackerIngameWindow,
+          kGameClassIds[0]
+        );
         setHotkeyText(text);
       } catch (error) {
         logger.error('Error getting hotkey text:', error);
       }
     };
 
-    overwolf.settings.hotkeys.onChanged.addListener((event: overwolf.settings.hotkeys.OnChangedEvent) => {
-      if (event.name === kHotkeys.toggleTrackerIngameWindow) {
-        setHotkeyText(event.binding);
+    overwolf.settings.hotkeys.onChanged.addListener(
+      (event: overwolf.settings.hotkeys.OnChangedEvent) => {
+        if (event.name === kHotkeys.toggleTrackerIngameWindow) {
+          setHotkeyText(event.binding);
+        }
       }
-    });
+    );
     setToggleHotkeyText();
   }, []);
 
@@ -201,7 +237,10 @@ const Tracker: React.FC = () => {
 
   const handleReleaseNotesClose = useCallback(() => {
     setIsReleaseNotesModalOpen(false);
-    if (releaseNotesEntry && !releaseNotesService.hasViewedReleaseNote(releaseNotesEntry)) {
+    if (
+      releaseNotesEntry &&
+      !releaseNotesService.hasViewedReleaseNote(releaseNotesEntry)
+    ) {
       releaseNotesService.markReleaseNotesViewed(releaseNotesEntry);
       setReleaseNotesViewed(true);
     }
@@ -213,7 +252,9 @@ const Tracker: React.FC = () => {
   };
 
   const handleSubmissionFormClick = () => {
-    overwolf.utils.openUrlInDefaultBrowser('https://forms.gle/SJdNDZWE5cbNiXLL8');
+    overwolf.utils.openUrlInDefaultBrowser(
+      'https://forms.gle/SJdNDZWE5cbNiXLL8'
+    );
   };
 
   const handleResetGameTimeStats = () => {
@@ -226,35 +267,45 @@ const Tracker: React.FC = () => {
     }
   };
 
-  const headerActionButtons: Array<{ icon: string; title: string; onClick: () => void }> = [
+  const headerActionButtons: Array<{
+    icon: string;
+    title: string;
+    onClick: () => void;
+  }> = [
     ...(releaseNotesEntry && isFTUEComplete
       ? [
           {
             icon: releaseNotesViewed ? '📰' : '✨',
-            title: releaseNotesViewed ? 'View Release Notes' : 'New Release Notes Available',
-            onClick: handleReleaseNotesOpen
-          }
+            title: releaseNotesViewed
+              ? 'View Release Notes'
+              : 'New Release Notes Available',
+            onClick: handleReleaseNotesOpen,
+          },
         ]
       : []),
     {
       icon: '📝',
       title: 'Submit Feedback',
-      onClick: handleSubmissionFormClick
+      onClick: handleSubmissionFormClick,
     },
     {
       icon: '⚙️',
       title: 'Settings',
-      onClick: handleSettingsClick
-    }
+      onClick: handleSettingsClick,
+    },
   ];
 
   return (
     <>
       <FTUEWelcomeModal />
-      <AppHeader 
-        title={isIngameWindow ? 'Fortnite Map Tracker • In-Game' : 'Fortnite Map Tracker • Desktop'}
+      <AppHeader
+        title={
+          isIngameWindow
+            ? 'Fortnite Map Tracker • In-Game'
+            : 'Fortnite Map Tracker • Desktop'
+        }
         appVersion={appVersion ?? undefined}
-        hotkeyText={hotkeyText} 
+        hotkeyText={hotkeyText}
         showHotkey={isIngameWindow}
         actionButtons={headerActionButtons}
       />
@@ -264,7 +315,7 @@ const Tracker: React.FC = () => {
           <div className="tracker-main-content">
             {showSettings ? (
               <div className="settings-wrapper">
-                <Settings 
+                <Settings
                   initialTab={settingsInitialTab}
                   onResetGameTimeStats={handleResetGameTimeStats}
                   onClose={() => setShowSettings(false)}
@@ -273,41 +324,36 @@ const Tracker: React.FC = () => {
             ) : (
               <>
                 <div className="view-mode-tabs">
-                  {VIEW_MODE_TABS && VIEW_MODE_TABS.map(tab => (
-                    <button
-                      key={tab.mode}
-                      onClick={() => handleViewModeChange(tab.mode)}
-                      className={`view-mode-tab ${viewMode === tab.mode ? 'active' : ''}`}
-                    >
-                      {tab.icon} {tab.label}
-                    </button>
-                  ))}
+                  {VIEW_MODE_TABS &&
+                    VIEW_MODE_TABS.map((tab) => (
+                      <button
+                        key={tab.mode}
+                        onClick={() => handleViewModeChange(tab.mode)}
+                        className={`view-mode-tab ${
+                          viewMode === tab.mode ? 'active' : ''
+                        }`}
+                      >
+                        {tab.icon} {tab.label}
+                      </button>
+                    ))}
                 </div>
 
                 <div className="view-content">
-                  {viewMode === 'overview' && (
-                    <Overview />
-                  )}
+                  {viewMode === 'overview' && <Overview />}
 
                   {viewMode === 'top-maps' && (
-                    <TopMaps />
+                    <TopMapsPage messageChannel={trackerMessageChannel} />
                   )}
 
-                  {viewMode === 'dashboards' && (
-                    <Dashboards />
-                  )}
+                  {viewMode === 'dashboards' && <Dashboards />}
 
-                  {viewMode === 'recommendations' && (
-                    <Recommendations />
-                  )}
+                  {viewMode === 'recommendations' && <Recommendations />}
 
-                  {viewMode === 'widgets' && (
-                    <WidgetContainer />
-                  )}
+                  {viewMode === 'widgets' && <WidgetContainer />}
                 </div>
               </>
             )}
-            <ReleaseNotesModal 
+            <ReleaseNotesModal
               isOpen={isReleaseNotesModalOpen}
               note={releaseNotesEntry}
               onClose={handleReleaseNotesClose}
@@ -315,14 +361,22 @@ const Tracker: React.FC = () => {
             />
           </div>
           <div className="tracker-ad-sidebar">
-            <AdContainer width={400} height={60} className="tracker-ad-container-small" />
-            <AdContainer width={400} height={600} className="tracker-ad-container" />
+            <AdContainer
+              width={400}
+              height={60}
+              className="tracker-ad-container-small"
+            />
+            <AdContainer
+              width={400}
+              height={600}
+              className="tracker-ad-container"
+            />
           </div>
         </div>
       </main>
-      
+
       {showHotkeyWarning && (
-        <UnassignedHotkeyModal 
+        <UnassignedHotkeyModal
           unassignedHotkeys={unassignedHotkeys}
           onOpenSettings={() => {
             setShowHotkeyWarning(false);

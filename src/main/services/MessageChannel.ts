@@ -14,7 +14,9 @@ export enum MessageType {
   FTUE_STATUS_RESPONSE = 'ftue-status-response',
   HOTKEY_UPDATED = 'hotkey-updated',
   GAME_TIME_UPDATED = 'game-time-updated',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
+  TOP_MAPS_REQUEST = "top-maps-request",
+  TOP_MAPS_UPDATED = "top-maps-updated",
 }
 
 /**
@@ -64,13 +66,13 @@ export class MessageChannel {
     try {
       // Overwolf API sends: { content: payload, ... }
       // The payload we sent has { type, data, timestamp }
-      const payload: MessagePayload = typeof message.content === 'string' 
-        ? JSON.parse(message.content) 
+      const payload: MessagePayload = typeof message.content === 'string'
+        ? JSON.parse(message.content)
         : message.content;
 
       // Also check if type is directly on message (some Overwolf API versions)
       const messageType = payload.type || (message as any).type;
-      
+
       if (!messageType) {
         logger.warn('Received message without type:', { payload, message });
         return;

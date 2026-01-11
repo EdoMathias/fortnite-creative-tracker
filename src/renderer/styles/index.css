@@ -1,0 +1,40 @@
+/* =================================
+   Fortnite Creative Tracker Styles
+   Modular CSS Architecture
+   ================================= */
+
+/* 1. Variables & Tokens */
+@import './variables.css';
+
+/* 2. Base & Reset Styles */
+@import './base.css';
+
+/* 3. Layout System */
+@import './layout.css';
+
+/* 4. Shared Components */
+@import './components/buttons.css';
+@import './components/modals.css';
+@import './components/inputs.css';
+@import './components/tabs.css';
+@import './components/cards.css';
+@import './components/header.css';
+@import './components/widgets.css';
+
+/* 5. View-Specific Styles */
+@import './views/overview.css';
+@import './views/topmaps.css';
+@import './views/settings.css';
+@import './views/ftue.css';
+@import './views/ingame.css';
+
+/* 
+ * CSS Modules Migration Guide:
+ * ----------------------------
+ * For component-specific styles that need CSS Modules:
+ * 1. Create a .module.css file next to the component (e.g., TrendMini.module.css)
+ * 2. Import it in the component: import styles from './TrendMini.module.css'
+ * 3. Use: className={styles.trendMini}
+ * 
+ * Keep shared styles in this architecture for global consistency.
+ */
