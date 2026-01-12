@@ -20,13 +20,13 @@ ChartJS.register(
   Filler
 );
 
-type TimeRange = 'today' | '7d' | '30d' | 'all';
+import { TimeRange, TrendDirection } from '../../../../../shared/consts';
 
 interface TrendMiniProps {
   dailyMs7: number[];
-  label: string;
-  direction: 'up' | 'down' | 'flat';
+  direction: TrendDirection;
   timeRange?: TimeRange;
+  label?: string;
 }
 
 // Generate appropriate labels based on time range

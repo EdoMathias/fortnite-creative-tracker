@@ -1,31 +1,36 @@
 import React from 'react';
-import { MapData } from '../../../../../shared/consts';
+import { MapData, TimeRange } from '../../../../../shared/consts';
 import RankBadge from './RankBadge';
 import MapInfo from './MapInfo';
-import TrendChart from './TrendChart';
-import TrendArrow from './TrendArrow';
-import TrendLabel from './TrendLabel';
+import TrendMini from './TrendMini';
 
 interface TableRowProps {
     map: MapData;
+    timeRange: TimeRange;
+    onPlay?: (mapId: string) => void;
 }
 
-const TableRow: React.FC<TableRowProps> = ({ map }) => {
+const TableRow: React.FC<TableRowProps> = ({ map, timeRange, onPlay }) => {
+    const handlePlay = () => {
+        onPlay?.(map.map_id);
+    };
+
     return (
         <div className="maps-grid maps-grid--row">
             <div><RankBadge rank={map.rank} /></div>
-            <div><MapInfo title={map.title} map_id={map.map_id} /></div>
+            <div><MapInfo title={map.title ?? map.map_id} map_id={map.map_id} /></div>
             <div className="col-time">
                 <span className="time-value">{map.timePlayed}</span>
-                {/* optional: sessions */}
-                {/* <span className="time-sub">{map.sessions} sessions</span> */}
             </div>
             <div className="col-trend">
-                <TrendChart data={map.trend} />
-                <TrendLabel days={map.trend} />
+                <TrendMini
+                    dailyMs7={map.trend}
+                    direction={map.trendDirection}
+                    timeRange={timeRange}
+                />
             </div>
             <div className="col-action">
-                <TrendArrow direction={map.trendDirection} />
+                <button className="play-btn" onClick={handlePlay}>Play</button>
             </div>
         </div>
     );

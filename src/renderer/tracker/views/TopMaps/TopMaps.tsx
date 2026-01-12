@@ -4,10 +4,11 @@ import {
   MessageType,
   MessagePayload,
 } from '../../../../main/services/MessageChannel';
-import { kWindowNames, mockTopMaps, MapData, TimeRange } from '../../../../shared/consts';
+import { kWindowNames, MapData, TimeRange } from '../../../../shared/consts';
 
+import TableHeader from './components/TableHeader';
+import TableRow from './components/TableRow';
 import TimeRangeSelector from './components/TimeRangeSelector';
-import TrendMini from './components/TrendMini';
 import { mockTopMapsByRange } from './utils/mockTopMaps';
 
 export function TopMapsPage({
@@ -16,10 +17,7 @@ export function TopMapsPage({
   messageChannel: MessageChannel;
 }) {
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
-  // const [maps, setMaps] = useState<MapData[]>([]);
-
-  // Mock data
-  const [maps, setMaps] = useState<MapData[]>(mockTopMaps as MapData[]);
+  const [maps, setMaps] = useState<MapData[]>([]);
 
   // 1) Subscribe to updates
   useEffect(() => {
@@ -48,9 +46,14 @@ export function TopMapsPage({
     );
   }, [messageChannel, timeRange]);
 
-  // 3) (Optional) if you want stable rendering order just trust rank; maps already sorted by facade
-  // const rows = useMemo(() => maps, [maps]);
+  // TODO: Switch to real data once backend is ready
+  // const rows = maps;
   const rows = mockTopMapsByRange[timeRange];
+
+  const handlePlayMap = (mapId: string) => {
+    // TODO: Implement play functionality
+    console.log('Play map:', mapId);
+  };
 
   return (
     <div className="topmaps-card">
@@ -68,42 +71,15 @@ export function TopMapsPage({
         </div>
       </div>
 
-      <div className="maps-grid maps-grid--header">
-        <div>RANK</div>
-        <div>MAP</div>
-        <div>TIME PLAYED</div>
-        <div>TREND {timeRange}</div>
-        <div className="col-action">ACTION</div>
-      </div>
+      <TableHeader timeRange={timeRange} />
 
-      {rows.map((r) => (
-        <div key={r.map_id} className="maps-grid maps-grid--row">
-          <div className="col-rank">#{r.rank}</div>
-
-          <div className="col-map">
-            <div className="map-title">{r.title ?? r.map_id}</div>
-            <div className="map-code">{r.map_id}</div>
-          </div>
-
-          <div className="col-time">
-            <div className="time-value">{r.timePlayed}</div>
-            {/* If you want sessions/playCount, add it to facade output and show here */}
-            {/* <div className="time-sub">{r.playCount ?? 0} sessions</div> */}
-          </div>
-
-          <div className="col-trend">
-            <TrendMini
-              dailyMs7={r.trend}
-              label={undefined as any}
-              direction={r.trendDirection}
-              timeRange={timeRange}
-            />
-          </div>
-
-          <div className="col-action">
-            <button className="play-btn">Play</button>
-          </div>
-        </div>
+      {rows.map((row) => (
+        <TableRow
+          key={row.map_id}
+          map={row}
+          timeRange={timeRange}
+          onPlay={handlePlayMap}
+        />
       ))}
     </div>
   );
