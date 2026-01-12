@@ -7,8 +7,10 @@ import {
   FTUEWelcomeModal,
   UnassignedHotkeyModal,
   ReleaseNotesModal,
+  LaunchingOverlay,
 } from '../components';
 import { FTUEProvider, useFTUE } from '../contexts/FTUEContext';
+import { LaunchingProvider } from '../contexts/LaunchingContext';
 import { AdContainer, Settings } from './components';
 import {
   MessageChannel,
@@ -29,7 +31,7 @@ import Overview from './views/Overview';
 import { useMapsData } from '../hooks/useMapsData';
 import TopMapsPage from './views/TopMaps/TopMaps';
 import useViewMode from '../hooks/useViewMode';
-import Dashboards from './views/Dashboards';
+import Dashboards from './views/Dashboard/Dashboards';
 import Recommendations from './views/Recommendations';
 
 const logger = createLogger('Tracker');
@@ -272,8 +274,8 @@ const Tracker: React.FC = () => {
     title: string;
     onClick: () => void;
   }> = [
-      ...(releaseNotesEntry && isFTUEComplete
-        ? [
+    ...(releaseNotesEntry && isFTUEComplete
+      ? [
           {
             icon: releaseNotesViewed ? '📰' : '✨',
             title: releaseNotesViewed
@@ -282,18 +284,18 @@ const Tracker: React.FC = () => {
             onClick: handleReleaseNotesOpen,
           },
         ]
-        : []),
-      {
-        icon: '📝',
-        title: 'Submit Feedback',
-        onClick: handleSubmissionFormClick,
-      },
-      {
-        icon: '⚙️',
-        title: 'Settings',
-        onClick: handleSettingsClick,
-      },
-    ];
+      : []),
+    {
+      icon: '📝',
+      title: 'Submit Feedback',
+      onClick: handleSubmissionFormClick,
+    },
+    {
+      icon: '⚙️',
+      title: 'Settings',
+      onClick: handleSettingsClick,
+    },
+  ];
 
   return (
     <>
@@ -313,6 +315,7 @@ const Tracker: React.FC = () => {
       <main className="tracker-main">
         <div className="tracker-main-content-wrapper">
           <div className="tracker-main-content">
+            <LaunchingOverlay />
             {showSettings ? (
               <div className="settings-wrapper">
                 <Settings
@@ -329,8 +332,9 @@ const Tracker: React.FC = () => {
                       <button
                         key={tab.mode}
                         onClick={() => handleViewModeChange(tab.mode)}
-                        className={`view-mode-tab ${viewMode === tab.mode ? 'active' : ''
-                          }`}
+                        className={`view-mode-tab ${
+                          viewMode === tab.mode ? 'active' : ''
+                        }`}
                       >
                         {tab.icon} {tab.label}
                       </button>
@@ -399,7 +403,9 @@ const mountTracker = () => {
   const root = createRoot(container);
   root.render(
     <FTUEProvider>
-      <Tracker />
+      <LaunchingProvider>
+        <Tracker />
+      </LaunchingProvider>
     </FTUEProvider>
   );
 };

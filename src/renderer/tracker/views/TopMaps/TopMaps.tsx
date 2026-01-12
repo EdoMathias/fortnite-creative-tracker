@@ -4,9 +4,15 @@ import {
   MessageType,
   MessagePayload,
 } from '../../../../main/services/MessageChannel';
-import { kBaseCreativeMapsUrl, kWindowNames, MapData, TimeRange } from '../../../../shared/consts';
+import {
+  kFortniteDeepLink,
+  kWindowNames,
+  MapData,
+  TimeRange,
+} from '../../../../shared/consts';
 import { mockTopMapsByRange } from './utils/mockTopMaps';
 import { createLogger } from '../../../../shared/services';
+import { useLaunching } from '../../../contexts/LaunchingContext';
 import TimeRangeSelector from './components/TimeRangeSelector';
 import TableHeader from './components/TableHeader';
 import TableRow from './components/TableRow';
@@ -26,8 +32,11 @@ interface TopMapsPageProps {
 const TopMapsPage: React.FC<TopMapsPageProps> = ({ messageChannel }) => {
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
   const [maps, setMaps] = useState<MapData[]>([]);
-  const [status, setStatus] = useState<FetchStatus>(USE_MOCK_DATA ? 'success' : 'loading');
+  const [status, setStatus] = useState<FetchStatus>(
+    USE_MOCK_DATA ? 'success' : 'loading'
+  );
   const [error, setError] = useState<string | null>(null);
+  const { launchMap } = useLaunching();
 
   // 1) Subscribe to updates
   useEffect(() => {
@@ -85,78 +94,78 @@ const TopMapsPage: React.FC<TopMapsPageProps> = ({ messageChannel }) => {
 
   const handlePlayMap = (mapId: string) => {
     logger.log('Launching map:', mapId);
-    // overwolf.utils.openUrlInDefaultBrowser(`${kBaseCreativeMapsUrl}/${mapId}`);
-    window.open(`${kBaseCreativeMapsUrl}/${mapId}`, '_blank');
+    launchMap(mapId);
   };
 
   return (
-  <div className="topmaps-card">
-    <div className="topmaps-header">
-      <div>
-        <div className="title">Top Played Maps</div>
-        <div className="subtitle">
-          Sorted by time played in selected range
+    <div className="topmaps-card">
+      <div className="topmaps-header">
+        <div>
+          <div className="title">Top Played Maps</div>
+          <div className="subtitle">
+            Sorted by time played in selected range
+          </div>
+        </div>
+
+        <div className="range-block">
+          <div className="range-label">Time Played In</div>
+          <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
         </div>
       </div>
 
-      <div className="range-block">
-        <div className="range-label">Time Played In</div>
-        <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
-      </div>
+      <TableHeader timeRange={timeRange} />
+
+      {/* Loading State */}
+      {status === 'loading' && (
+        <div className="topmaps-status">
+          <div className="topmaps-spinner" />
+          <span>Loading maps...</span>
+        </div>
+      )}
+
+      {/* Error State */}
+      {status === 'error' && (
+        <div className="topmaps-status topmaps-status--error">
+          <span>⚠️ {error || 'Failed to load maps'}</span>
+          <button
+            className="retry-btn"
+            onClick={() => {
+              setStatus('loading');
+              messageChannel.sendMessage(
+                kWindowNames.background,
+                MessageType.TOP_MAPS_REQUEST,
+                { range: timeRange }
+              );
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {status === 'success' && rows.length === 0 && (
+        <div className="topmaps-status topmaps-status--empty">
+          <span>🎮</span>
+          <span>No maps played yet</span>
+          <span className="topmaps-status-hint">
+            Play some Creative maps and they'll show up here!
+          </span>
+        </div>
+      )}
+
+      {/* Data */}
+      {status === 'success' &&
+        rows.map((row) => (
+          <TableRow
+            key={row.map_id}
+            map={row}
+            timeRange={timeRange}
+            onPlay={handlePlayMap}
+          />
+        ))}
     </div>
-
-    <TableHeader timeRange={timeRange} />
-
-    {/* Loading State */}
-    {status === 'loading' && (
-      <div className="topmaps-status">
-        <div className="topmaps-spinner" />
-        <span>Loading maps...</span>
-      </div>
-    )}
-
-    {/* Error State */}
-    {status === 'error' && (
-      <div className="topmaps-status topmaps-status--error">
-        <span>⚠️ {error || 'Failed to load maps'}</span>
-        <button
-          className="retry-btn"
-          onClick={() => {
-            setStatus('loading');
-            messageChannel.sendMessage(
-              kWindowNames.background,
-              MessageType.TOP_MAPS_REQUEST,
-              { range: timeRange }
-            );
-          }}
-        >
-          Retry
-        </button>
-      </div>
-    )}
-
-    {/* Empty State */}
-    {status === 'success' && rows.length === 0 && (
-      <div className="topmaps-status topmaps-status--empty">
-        <span>🎮</span>
-        <span>No maps played yet</span>
-        <span className="topmaps-status-hint">
-          Play some Creative maps and they'll show up here!
-        </span>
-      </div>
-    )}
-
-    {/* Data */}
-    {status === 'success' && rows.map((row) => (
-      <TableRow
-        key={row.map_id}
-        map={row}
-        timeRange={timeRange}
-        onPlay={handlePlayMap}
-      />
-    ))}
-  </div>
-);
+  );
 };
 
 export default TopMapsPage;
