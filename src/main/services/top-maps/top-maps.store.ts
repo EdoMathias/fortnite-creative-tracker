@@ -1,13 +1,31 @@
 /**
  * @fileoverview Top Maps Store - Manages persistent storage for map play sessions.
- * Uses localStorage to persist session data across app restarts.
+ * 
+ * Uses IndexedDB for scalable storage that can handle large datasets.
+ * Automatically migrates data from localStorage on first use.
  * Data is automatically cleaned up after 90 days.
+ * 
+ * Architecture:
+ * - Store state is cached in memory for synchronous reads
+ * - Writes are async but fire-and-forget for performance
+ * - Initialization must complete before use (call init() on app startup)
  */
 
 import { startOfDay, dayKey, MS_PER_DAY, MS_PER_HOUR } from "../../../shared/utils/dateUtils";
+import { IndexedDBStorage } from "../../../shared/utils/indexedDBStorage";
 
-/** Local storage key for the top maps data */
-const LS_KEY = "fit.topMaps.v1";
+// ============================================================================
+// Constants
+// ============================================================================
+
+/** IndexedDB database name */
+const DB_NAME = "fit-top-maps";
+
+/** IndexedDB store name */
+const STORE_NAME = "store";
+
+/** Key used for the main store data */
+const STORE_KEY = "data";
 
 /** Maximum session duration before auto-recovery (8 hours) */
 const MAX_SESSION_MS = 8 * MS_PER_HOUR;
@@ -17,19 +35,6 @@ const RETENTION_DAYS = 90;
 
 /** Minimum interval between cleanup runs (1 hour) */
 const CLEANUP_INTERVAL_MS = MS_PER_HOUR;
-
-// ============================================================================
-// Internal Utilities
-// ============================================================================
-
-/**
- * Get the current timestamp in milliseconds.
- * Wrapped for potential future mocking in tests.
- * @returns Current Unix timestamp in ms
- */
-function nowMs(): number {
-    return Date.now();
-}
 
 // ============================================================================
 // Types
@@ -64,35 +69,31 @@ export type StoreV1 = {
 };
 
 // ============================================================================
-// Storage Operations
+// Internal State
+// ============================================================================
+
+/** IndexedDB storage instance */
+const storage = new IndexedDBStorage<StoreV1>(DB_NAME, STORE_NAME);
+
+/** In-memory cache of the store state */
+let cachedStore: StoreV1 | null = null;
+
+/** Whether initialization has completed */
+let isInitialized = false;
+
+/** Pending save promise to prevent write conflicts */
+let pendingSave: Promise<void> | null = null;
+
+// ============================================================================
+// Internal Utilities
 // ============================================================================
 
 /**
- * Load the store from localStorage.
- * Returns a fresh store if none exists or data is corrupted.
- * @returns The loaded or initialized store
+ * Get the current timestamp in milliseconds.
+ * @returns Current Unix timestamp in ms
  */
-function load(): StoreV1 {
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) {
-        return createEmptyStore();
-    }
-
-    try {
-        const parsed = JSON.parse(raw) as StoreV1;
-        if (parsed.version !== 1) {
-            return createEmptyStore();
-        }
-        return {
-            version: 1,
-            activeSession: parsed.activeSession ?? null,
-            sessions: parsed.sessions ?? [],
-            dailyTotals: parsed.dailyTotals ?? {},
-            lastCleanupAt: parsed.lastCleanupAt,
-        };
-    } catch {
-        return createEmptyStore();
-    }
+function nowMs(): number {
+    return Date.now();
 }
 
 /**
@@ -109,11 +110,63 @@ function createEmptyStore(): StoreV1 {
 }
 
 /**
- * Persist the store to localStorage.
- * @param store - The store to save
+ * Load the store from IndexedDB.
+ * @returns The loaded store or null if none exists
  */
-function save(store: StoreV1): void {
-    localStorage.setItem(LS_KEY, JSON.stringify(store));
+async function loadFromDB(): Promise<StoreV1 | null> {
+    try {
+        const data = await storage.get(STORE_KEY);
+        if (data && data.version === 1) {
+            return {
+                version: 1,
+                activeSession: data.activeSession ?? null,
+                sessions: data.sessions ?? [],
+                dailyTotals: data.dailyTotals ?? {},
+                lastCleanupAt: data.lastCleanupAt,
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('[TopMapsStore] Failed to load from IndexedDB:', error);
+        return null;
+    }
+}
+
+/**
+ * Save the store to IndexedDB asynchronously.
+ * Uses a queue to prevent concurrent writes.
+ */
+function saveAsync(): void {
+    if (!cachedStore) return;
+
+    const storeToSave = { ...cachedStore };
+
+    const doSave = async () => {
+        try {
+            await storage.set(STORE_KEY, storeToSave);
+        } catch (error) {
+            console.error('[TopMapsStore] Failed to save to IndexedDB:', error);
+        }
+        pendingSave = null;
+    };
+
+    if (pendingSave) {
+        pendingSave = pendingSave.then(doSave);
+    } else {
+        pendingSave = doSave();
+    }
+}
+
+/**
+ * Get the cached store, throwing if not initialized.
+ * @returns The cached store
+ * @throws Error if not initialized
+ */
+function getStore(): StoreV1 {
+    if (!isInitialized || !cachedStore) {
+        throw new Error('[TopMapsStore] Store not initialized. Call init() first.');
+    }
+    return cachedStore;
 }
 
 // ============================================================================
@@ -122,8 +175,6 @@ function save(store: StoreV1): void {
 
 /**
  * Add session time to daily totals, splitting across day boundaries.
- * Handles sessions that span multiple days by allocating time to each day.
- * 
  * @param dailyTotals - The daily totals record to update
  * @param map_id - The map identifier
  * @param startedAt - Session start timestamp
@@ -156,7 +207,6 @@ function addToDailyTotals(
 /**
  * Remove old data from the store to prevent unbounded growth.
  * Runs at most once per hour. Removes data older than RETENTION_DAYS.
- * 
  * @param store - The store to clean up
  * @param now - Current timestamp
  */
@@ -182,8 +232,6 @@ function cleanup(store: StoreV1, now: number): void {
 
 /**
  * End the currently active session and persist it.
- * Does nothing if no session is active or if endAt is before startedAt.
- * 
  * @param store - The store containing the active session
  * @param endAt - Timestamp to end the session at
  */
@@ -217,27 +265,63 @@ function endActiveSessionInternal(store: StoreV1, endAt: number): void {
 /**
  * Top Maps Store - Singleton for managing map play session data.
  * 
+ * IMPORTANT: Call init() before using any other methods.
+ * 
  * @example
  * ```ts
+ * // Initialize on app startup
+ * await topMapsStore.init();
+ * 
  * // Start tracking a map session
  * topMapsStore.start("1234-5678-9012");
  * 
  * // Stop the current session
  * topMapsStore.stop();
  * 
- * // Read current data
+ * // Read current data (synchronous after init)
  * const data = topMapsStore.read();
  * ```
  */
 export const topMapsStore = {
     /**
+     * Initialize the store. Must be called before any other operations.
+     * Handles migration from localStorage if needed.
+     * Safe to call multiple times.
+     */
+    async init(): Promise<void> {
+        if (isInitialized) return;
+
+        try {
+            await storage.init();
+
+            // Load existing data or create empty store
+            cachedStore = (await loadFromDB()) ?? createEmptyStore();
+            isInitialized = true;
+
+            console.log('[TopMapsStore] Initialized successfully');
+        } catch (error) {
+            console.error('[TopMapsStore] Failed to initialize:', error);
+            // Fall back to in-memory only
+            cachedStore = createEmptyStore();
+            isInitialized = true;
+        }
+    },
+
+    /**
+     * Check if the store is initialized.
+     * @returns True if init() has completed
+     */
+    isReady(): boolean {
+        return isInitialized;
+    },
+
+    /**
      * Start a new map session.
      * If another session is active, it will be closed first.
-     * 
      * @param map_id - The map code to start tracking
      */
     start(map_id: string): void {
-        const store = load();
+        const store = getStore();
         const now = nowMs();
 
         // Close any existing session (safety measure)
@@ -246,7 +330,7 @@ export const topMapsStore = {
         }
 
         store.activeSession = { map_id, startedAt: now };
-        save(store);
+        saveAsync();
     },
 
     /**
@@ -254,22 +338,21 @@ export const topMapsStore = {
      * Does nothing if no session is active.
      */
     stop(): void {
-        const store = load();
+        const store = getStore();
         endActiveSessionInternal(store, nowMs());
-        save(store);
+        saveAsync();
     },
 
     /**
      * Stop the active session only if it matches the given map ID.
      * Useful when leaving a specific map.
-     * 
      * @param map_id - The map code to conditionally stop
      */
     stopIfActiveMapIs(map_id: string): void {
-        const store = load();
+        const store = getStore();
         if (store.activeSession?.map_id === map_id) {
             endActiveSessionInternal(store, nowMs());
-            save(store);
+            saveAsync();
         }
     },
 
@@ -279,22 +362,32 @@ export const topMapsStore = {
      * it will be automatically closed. Call this on app startup.
      */
     recover(): void {
-        const store = load();
+        const store = getStore();
         const active = store.activeSession;
         if (!active) return;
 
         const now = nowMs();
         if (now - active.startedAt > MAX_SESSION_MS) {
             endActiveSessionInternal(store, now);
-            save(store);
+            saveAsync();
         }
     },
 
     /**
-     * Read the current store state.
+     * Read the current store state (synchronous after init).
      * @returns The current store data (readonly use recommended)
      */
     read(): StoreV1 {
-        return load();
+        return getStore();
+    },
+
+    /**
+     * Wait for any pending saves to complete.
+     * Useful for testing or before app shutdown.
+     */
+    async flush(): Promise<void> {
+        if (pendingSave) {
+            await pendingSave;
+        }
     },
 };

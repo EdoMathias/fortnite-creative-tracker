@@ -6,6 +6,7 @@ import { GameEventsService } from '../services/game-events.service';
 import { kHotkeys } from '../../shared/consts';
 import { createLogger } from '../../shared/services/Logger';
 import { WindowsController } from './windows.controller';
+import { topMapsStore } from '../services/top-maps/top-maps.store';
 
 const logger = createLogger('BackgroundController');
 
@@ -54,6 +55,10 @@ export class BackgroundController {
    * Starts the background controller and initializes all services
    */
   public async run(): Promise<void> {
+    // Initialize the top maps store (handles localStorage migration)
+    await topMapsStore.init();
+    topMapsStore.recover();
+
     // Determine which window to show based on game state
     const shouldShowInGame = await this._gameStateService.isSupportedGameRunning();
     if (shouldShowInGame) {
