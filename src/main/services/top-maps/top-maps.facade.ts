@@ -5,6 +5,14 @@
 
 import { topMapsStore } from "./top-maps.store";
 import type { TimeRange, MapData, TrendDirection } from "../../../shared/consts";
+import {
+    startOfDay,
+    dayKey,
+    lastNDaysKeys,
+    formatDuration,
+    MS_PER_DAY,
+    MS_PER_MINUTE,
+} from "../../../shared/utils/dateUtils";
 
 // ============================================================================
 // Types
@@ -23,76 +31,11 @@ export type MapMetaResolver = (map_id: string) => MapMeta | undefined;
 // Constants
 // ============================================================================
 
-/** Milliseconds in a day */
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
-/** Milliseconds in a minute */
-const MS_PER_MINUTE = 60 * 1000;
-
 /** Threshold for trend direction change (2 minutes in ms) */
 const TREND_DEADZONE_MS = 2 * MS_PER_MINUTE;
 
 /** Number of days for trend calculation */
 const TREND_DAYS = 7;
-
-// ============================================================================
-// Date/Time Utilities
-// ============================================================================
-
-/**
- * Get the timestamp for the start of a given day (midnight local time).
- * @param ts - Unix timestamp in ms
- * @returns Timestamp of midnight on that day
- */
-function startOfDay(ts: number): number {
-    const d = new Date(ts);
-    d.setHours(0, 0, 0, 0);
-    return d.getTime();
-}
-
-/**
- * Convert a timestamp to a date key string.
- * @param ts - Unix timestamp in ms
- * @returns Date string in "YYYY-MM-DD" format
- */
-function dayKey(ts: number): string {
-    const d = new Date(ts);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-/**
- * Format a duration in milliseconds to a human-readable string.
- * @param ms - Duration in milliseconds
- * @returns Formatted string like "2h 30m" or "45m"
- * 
- * @example
- * formatDuration(9000000) // "2h 30m"
- * formatDuration(2700000) // "45m"
- */
-function formatDuration(ms: number): string {
-    const totalMin = Math.floor(ms / MS_PER_MINUTE);
-    const h = Math.floor(totalMin / 60);
-    const m = totalMin % 60;
-    return h > 0 ? `${h}h ${m}m` : `${m}m`;
-}
-
-/**
- * Generate an array of date keys for the last N days.
- * @param n - Number of days to include
- * @param now - Reference timestamp (defaults to current time)
- * @returns Array of "YYYY-MM-DD" strings, oldest to newest
- * 
- * @example
- * lastNDaysKeys(3) // ["2026-01-10", "2026-01-11", "2026-01-12"]
- */
-function lastNDaysKeys(n: number, now = Date.now()): string[] {
-    const today0 = startOfDay(now);
-    const keys: string[] = [];
-    for (let i = n - 1; i >= 0; i--) {
-        keys.push(dayKey(today0 - i * MS_PER_DAY));
-    }
-    return keys;
-}
 
 /**
  * Get the start timestamp for a given time range.

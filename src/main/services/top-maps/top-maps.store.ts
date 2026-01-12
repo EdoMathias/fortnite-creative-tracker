@@ -4,20 +4,32 @@
  * Data is automatically cleaned up after 90 days.
  */
 
+import { startOfDay, dayKey, MS_PER_DAY, MS_PER_HOUR } from "../../../shared/utils/dateUtils";
+
 /** Local storage key for the top maps data */
 const LS_KEY = "fit.topMaps.v1";
 
 /** Maximum session duration before auto-recovery (8 hours) */
-const MAX_SESSION_MS = 8 * 60 * 60 * 1000;
+const MAX_SESSION_MS = 8 * MS_PER_HOUR;
 
 /** Number of days to retain data before cleanup */
 const RETENTION_DAYS = 90;
 
 /** Minimum interval between cleanup runs (1 hour) */
-const CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
+const CLEANUP_INTERVAL_MS = MS_PER_HOUR;
 
-/** Milliseconds in a day */
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
+// ============================================================================
+// Internal Utilities
+// ============================================================================
+
+/**
+ * Get the current timestamp in milliseconds.
+ * Wrapped for potential future mocking in tests.
+ * @returns Current Unix timestamp in ms
+ */
+function nowMs(): number {
+    return Date.now();
+}
 
 // ============================================================================
 // Types
@@ -50,42 +62,6 @@ export type StoreV1 = {
     dailyTotals: DailyTotals;
     lastCleanupAt?: number;
 };
-
-// ============================================================================
-// Date/Time Utilities
-// ============================================================================
-
-/**
- * Get the current timestamp in milliseconds.
- * @returns Current Unix timestamp in ms
- */
-function nowMs(): number {
-    return Date.now();
-}
-
-/**
- * Get the timestamp for the start of a given day (midnight).
- * @param ts - Unix timestamp in ms
- * @returns Timestamp of midnight on that day
- */
-function startOfDay(ts: number): number {
-    const d = new Date(ts);
-    d.setHours(0, 0, 0, 0);
-    return d.getTime();
-}
-
-/**
- * Convert a timestamp to a date key string.
- * @param ts - Unix timestamp in ms
- * @returns Date string in "YYYY-MM-DD" format
- */
-function dayKey(ts: number): string {
-    const d = new Date(ts);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-}
 
 // ============================================================================
 // Storage Operations
