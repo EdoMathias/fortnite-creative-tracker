@@ -39,6 +39,8 @@ export type HotkeyData = {
 
 export const kBaseCreativeMapsUrl = 'https://play.fn.gg/island';
 
+export type TrendDirection = 'up' | 'down' | 'flat';
+
 export interface MapData {
   map_id: string;
   title?: string;
@@ -48,7 +50,7 @@ export interface MapData {
   rank: number;
   timePlayed: string;
   trend: number[];
-  trendDirection: 'up' | 'down' | 'flat';
+  trendDirection: TrendDirection;
 }
 
 export type MapSession = {

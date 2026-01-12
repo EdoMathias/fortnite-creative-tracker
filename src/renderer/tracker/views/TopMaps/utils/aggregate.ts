@@ -1,4 +1,5 @@
 import { MapSession } from "../../../../../shared/consts";
+import { calculateTrendPercentage, getTrendDirection, formatTrendLabel } from "./trend";
 
 function overlapMs(session: MapSession, rangeStart: number, rangeEnd: number): number {
     const start = Math.max(session.startedAt, rangeStart);
@@ -25,36 +26,6 @@ function buildDailyStarts(days: number, nowMs = Date.now()): number[] {
 function dayIndex(dailyStarts: number[], ts: number): number | null {
     const idx = Math.floor((startOfDayMs(ts) - dailyStarts[0]) / (24 * 60 * 60 * 1000));
     return idx >= 0 && idx < dailyStarts.length ? idx : null;
-}
-
-function trendPctFrom7(days: number[]): number | null {
-    const first = days[0];
-    const last = days[days.length - 1];
-    if (first <= 0 && last <= 0) return null;
-    if (first <= 0) return null; // treat as NEW
-    return ((last - first) / first) * 100;
-}
-
-function trendDirectionFromPct(pct: number | null, days: number[]): "up" | "down" | "flat" {
-    // If NEW spike
-    if (pct === null) {
-        if (days[0] === 0 && days[days.length - 1] > 0) return "up";
-        return "flat";
-    }
-    // deadzone avoids flicker
-    if (pct > 2) return "up";
-    if (pct < -2) return "down";
-    return "flat";
-}
-
-function trendLabelFrom7(days: number[]): string {
-    const pct = trendPctFrom7(days);
-    if (pct === null) {
-        const isNew = days[0] === 0 && days[days.length - 1] > 0;
-        return isNew ? "NEW" : "—";
-    }
-    const rounded = Math.round(pct);
-    return `${rounded > 0 ? "+" : ""}${rounded}%`;
 }
 
 export type MapAgg = {
@@ -126,9 +97,9 @@ export function toTopRows(
     const sorted = [...aggs].sort((a, b) => b.totalMs - a.totalMs);
 
     return sorted.map((a, i) => {
-        const label = trendLabelFrom7(a.trendDailyMs7);
-        const pct = trendPctFrom7(a.trendDailyMs7);
-        const dir = trendDirectionFromPct(pct, a.trendDailyMs7);
+        const pct = calculateTrendPercentage(a.trendDailyMs7);
+        const dir = getTrendDirection(pct, a.trendDailyMs7);
+        const label = formatTrendLabel(a.trendDailyMs7);
 
         return {
             rank: i + 1,
