@@ -1,0 +1,494 @@
+/* ------------------------------
+   Dashboard Page Styles
+--------------------------------*/
+
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Dashboard header with title and time range selector */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.dashboard-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+
+/* 2-column row */
+.dashboard-row-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  min-width: 0;
+}
+
+/* 3-column row */
+.dashboard-row-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  min-width: 0;
+}
+
+/* Full width card */
+.dashboard-full-width {
+  width: 100%;
+}
+
+/* Responsive: 3-col -> 2-col -> 1-col */
+@media (max-width: 1100px) {
+  .dashboard-row-3col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-row-3col > *:last-child {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 850px) {
+  .dashboard-row-2col {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-row-3col {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-row-3col > *:last-child {
+    grid-column: span 1;
+  }
+}
+
+/* ------------------------------
+   Chart Card
+--------------------------------*/
+
+.dashboard-chart-card {
+  background-color: #161925;
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: var(--radius);
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.1);
+  padding: 16px;
+  transition: all 0.2s ease;
+  min-width: 0;
+  overflow: hidden;
+}
+
+@media (min-width: 1100px) {
+  .dashboard-chart-card {
+    padding: 20px;
+  }
+}
+
+.dashboard-chart-card:hover {
+  border-color: rgba(52, 211, 153, 0.4);
+  box-shadow: 0 0 16px rgba(52, 211, 153, 0.2);
+}
+
+/* ------------------------------
+   Chart Header
+--------------------------------*/
+
+.dashboard-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dashboard-chart-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.dashboard-chart-title h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.dashboard-chart-icon {
+  font-size: 20px;
+  filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.4));
+}
+
+/* ------------------------------
+   Chart Stats (inline summary)
+--------------------------------*/
+
+.dashboard-chart-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.dashboard-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.dashboard-stat-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(52, 211, 153, 1);
+  white-space: nowrap;
+}
+
+.dashboard-stat-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ------------------------------
+   Chart Container
+--------------------------------*/
+
+.dashboard-chart-container {
+  position: relative;
+  height: 180px;
+  width: 100%;
+  min-width: 0;
+}
+
+.dashboard-chart-container.dashboard-chart-tall {
+  height: 160px;
+}
+
+@media (min-width: 1100px) {
+  .dashboard-chart-container {
+    height: 200px;
+  }
+
+  .dashboard-chart-container.dashboard-chart-tall {
+    height: 180px;
+  }
+}
+
+/* Taller chart for single column layout */
+.dashboard-chart-card:only-child .dashboard-chart-container {
+  height: 280px;
+}
+
+/* ------------------------------
+   Empty State
+--------------------------------*/
+
+.dashboard-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: rgba(255, 255, 255, 0.4);
+  gap: 8px;
+}
+
+.dashboard-empty-state-icon {
+  font-size: 32px;
+  opacity: 0.5;
+}
+
+.dashboard-empty-state-text {
+  font-size: 14px;
+}
+
+/* ------------------------------
+   Doughnut Chart Layout
+--------------------------------*/
+
+.dashboard-doughnut-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: auto;
+  min-height: 160px;
+}
+
+.dashboard-doughnut-container {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  flex-shrink: 0;
+}
+
+@media (min-width: 1200px) {
+  .dashboard-doughnut-wrapper {
+    gap: 24px;
+  }
+
+  .dashboard-doughnut-container {
+    width: 180px;
+    height: 180px;
+  }
+}
+
+.dashboard-doughnut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure canvas tooltip renders above center text */
+.dashboard-doughnut-container canvas {
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard-doughnut-total {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.dashboard-doughnut-label {
+  display: block;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ------------------------------
+   Custom Legend
+--------------------------------*/
+
+.dashboard-doughnut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.dashboard-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.dashboard-legend-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.dashboard-legend-label {
+  color: rgba(255, 255, 255, 0.8);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+.dashboard-legend-value {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* ------------------------------
+   Week Comparison
+--------------------------------*/
+
+.week-comparison-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.week-comparison-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  gap: 8px;
+}
+
+.week-comparison-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.week-comparison-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.week-comparison-values {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.week-comparison-current {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.week-comparison-previous {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.week-comparison-change {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.week-comparison-change.positive {
+  background: rgba(52, 211, 153, 0.15);
+  color: rgba(52, 211, 153, 1);
+}
+
+.week-comparison-change.negative {
+  background: rgba(255, 91, 122, 0.15);
+  color: rgba(255, 91, 122, 1);
+}
+
+.week-comparison-change.neutral {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.week-comparison-change .change-icon {
+  font-size: 12px;
+}
+
+.week-comparison-change .change-value {
+  font-size: 11px;
+}
+
+/* ------------------------------
+   Recent Sessions
+--------------------------------*/
+
+.recent-sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.recent-session-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  transition: background 0.15s ease;
+  gap: 8px;
+}
+
+.recent-session-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.recent-session-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.recent-session-map {
+  font-size: 11px;
+  font-weight: 500;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-session-code {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.4);
+  font-family: monospace;
+}
+
+.recent-session-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.recent-session-duration {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(52, 211, 153, 1);
+}
+
+.recent-session-time {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ------------------------------
+   Empty States
+--------------------------------*/
+
+.dashboard-empty-state,
+.recent-sessions-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+  text-align: center;
+  padding: 20px;
+}
+
+.recent-sessions-empty {
+  min-height: 100px;
+}
