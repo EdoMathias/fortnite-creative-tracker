@@ -53,8 +53,12 @@ const Overview = () => {
                         </div>
                     </div>
                 ) : (
-                    <div className="overview-map-empty">
-                        <span className="overview-map-empty-text">No map data yet</span>
+                    <div className="overview-empty-state">
+                        <span className="overview-empty-icon">🏆</span>
+                        <span className="overview-empty-title">No top map yet</span>
+                        <span className="overview-empty-hint">
+                            Play some Creative maps to see your most played here!
+                        </span>
                     </div>
                 )}
             </div>
@@ -72,8 +76,12 @@ const Overview = () => {
                             ))}
                         </div>
                     ) : (
-                        <div className="overview-map-empty">
-                            <span className="overview-map-empty-text">No recent maps</span>
+                        <div className="overview-empty-state overview-empty-state--compact">
+                            <span className="overview-empty-icon">🕐</span>
+                            <span className="overview-empty-title">No recent maps</span>
+                            <span className="overview-empty-hint">
+                                Maps you play will appear here
+                            </span>
                         </div>
                     )}
                 </div>
