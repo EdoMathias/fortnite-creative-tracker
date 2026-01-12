@@ -1,15 +1,4 @@
-export type TimeRange = 'today' | '7d' | '30d' | 'all';
-
-type MapData = {
-  map_id: string;
-  title?: string;
-  rank: number;
-  timePlayed: string; // required
-  trend: number[];
-  trendDirection: 'up' | 'down' | 'flat';
-  playCount?: number;
-  lastPlayed?: string;
-};
+import { MapData, TimeRange } from '../../../../../shared/consts';
 
 // Generate mock trend data with specified number of points
 function generateTrend(

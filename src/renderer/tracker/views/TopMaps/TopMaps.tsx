@@ -1,29 +1,14 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   MessageChannel,
   MessageType,
   MessagePayload,
 } from '../../../../main/services/MessageChannel';
-import { kWindowNames, mockTopMaps } from '../../../../shared/consts';
+import { kWindowNames, mockTopMaps, MapData, TimeRange } from '../../../../shared/consts';
 
 import TimeRangeSelector from './components/TimeRangeSelector';
 import TrendMini from './components/TrendMini';
 import { mockTopMapsByRange } from './utils/mockTopMaps';
-
-// Use your existing MapData type (recommended to include 'flat')
-type TimeRange = 'today' | '7d' | '30d' | 'all';
-
-type MapData = {
-  map_id: string;
-  title?: string;
-  thumbnail?: string;
-  playCount?: number;
-  lastPlayed?: string;
-  rank: number;
-  timePlayed: string; // already formatted by facade
-  trend: number[]; // last 7 days (ms or minutes – whatever facade outputs)
-  trendDirection: 'up' | 'down' | 'flat';
-};
 
 export function TopMapsPage({
   messageChannel,
