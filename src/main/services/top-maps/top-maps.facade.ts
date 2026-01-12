@@ -1,66 +1,170 @@
+/**
+ * @fileoverview Top Maps Facade - High-level API for retrieving top played maps data.
+ * Aggregates session data from the store and transforms it into display-ready format.
+ */
+
 import { topMapsStore } from "./top-maps.store";
-import type { TimeRange, MapData } from "../../../shared/consts";
+import type { TimeRange, MapData, TrendDirection } from "../../../shared/consts";
 
+// ============================================================================
+// Types
+// ============================================================================
 
-export type MapMeta = { title?: string; thumbnail?: string };
+/** Metadata for a map that can be resolved externally */
+export type MapMeta = {
+    title?: string;
+    thumbnail?: string;
+};
+
+/** Function type for resolving map metadata by map ID */
 export type MapMetaResolver = (map_id: string) => MapMeta | undefined;
 
-function startOfDay(ts: number) {
+// ============================================================================
+// Constants
+// ============================================================================
+
+/** Milliseconds in a day */
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/** Milliseconds in a minute */
+const MS_PER_MINUTE = 60 * 1000;
+
+/** Threshold for trend direction change (2 minutes in ms) */
+const TREND_DEADZONE_MS = 2 * MS_PER_MINUTE;
+
+/** Number of days for trend calculation */
+const TREND_DAYS = 7;
+
+// ============================================================================
+// Date/Time Utilities
+// ============================================================================
+
+/**
+ * Get the timestamp for the start of a given day (midnight local time).
+ * @param ts - Unix timestamp in ms
+ * @returns Timestamp of midnight on that day
+ */
+function startOfDay(ts: number): number {
     const d = new Date(ts);
     d.setHours(0, 0, 0, 0);
     return d.getTime();
 }
 
+/**
+ * Convert a timestamp to a date key string.
+ * @param ts - Unix timestamp in ms
+ * @returns Date string in "YYYY-MM-DD" format
+ */
 function dayKey(ts: number): string {
     const d = new Date(ts);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function formatDuration(ms: number) {
-    const totalMin = Math.floor(ms / 60000);
+/**
+ * Format a duration in milliseconds to a human-readable string.
+ * @param ms - Duration in milliseconds
+ * @returns Formatted string like "2h 30m" or "45m"
+ * 
+ * @example
+ * formatDuration(9000000) // "2h 30m"
+ * formatDuration(2700000) // "45m"
+ */
+function formatDuration(ms: number): string {
+    const totalMin = Math.floor(ms / MS_PER_MINUTE);
     const h = Math.floor(totalMin / 60);
     const m = totalMin % 60;
     return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
-function lastNDaysKeys(n: number, now = Date.now()) {
+/**
+ * Generate an array of date keys for the last N days.
+ * @param n - Number of days to include
+ * @param now - Reference timestamp (defaults to current time)
+ * @returns Array of "YYYY-MM-DD" strings, oldest to newest
+ * 
+ * @example
+ * lastNDaysKeys(3) // ["2026-01-10", "2026-01-11", "2026-01-12"]
+ */
+function lastNDaysKeys(n: number, now = Date.now()): string[] {
     const today0 = startOfDay(now);
     const keys: string[] = [];
     for (let i = n - 1; i >= 0; i--) {
-        keys.push(dayKey(today0 - i * 24 * 60 * 60 * 1000));
+        keys.push(dayKey(today0 - i * MS_PER_DAY));
     }
-    return keys; // oldest -> newest
+    return keys;
 }
 
-function rangeStartTs(range: TimeRange, now = Date.now()) {
+/**
+ * Get the start timestamp for a given time range.
+ * @param range - The time range to calculate from
+ * @param now - Reference timestamp (defaults to current time)
+ * @returns Unix timestamp for the start of the range
+ */
+function rangeStartTs(range: TimeRange, now = Date.now()): number {
     const today0 = startOfDay(now);
-    if (range === "today") return today0;
-    if (range === "7d") return today0 - 6 * 24 * 60 * 60 * 1000;
-    if (range === "30d") return today0 - 29 * 24 * 60 * 60 * 1000;
-    return 0;
+    switch (range) {
+        case "today":
+            return today0;
+        case "7d":
+            return today0 - 6 * MS_PER_DAY;
+        case "30d":
+            return today0 - 29 * MS_PER_DAY;
+        case "all":
+            return 0;
+    }
 }
 
-function trendDirectionFrom7(days: number[]): "up" | "down" | "flat" {
+// ============================================================================
+// Trend Calculations
+// ============================================================================
+
+/**
+ * Determine the trend direction from daily play time data.
+ * Uses a deadzone to avoid flickering on small changes.
+ * 
+ * @param days - Array of daily playtime values in ms
+ * @returns Trend direction: "up", "down", or "flat"
+ */
+function trendDirectionFrom7(days: number[]): TrendDirection {
     const first = days[0] ?? 0;
     const last = days[days.length - 1] ?? 0;
 
-    // deadzone: ignore tiny changes under 2 minutes
     const delta = last - first;
-    if (Math.abs(delta) < 2 * 60 * 1000) return "flat";
+    if (Math.abs(delta) < TREND_DEADZONE_MS) return "flat";
     return delta > 0 ? "up" : "down";
 }
 
+// ============================================================================
+// Public API
+// ============================================================================
+
+/**
+ * Get the top played maps for a given time range.
+ * 
+ * Aggregates play time data from the store, calculates trends,
+ * and returns a sorted list of maps ready for display.
+ * 
+ * @param range - The time range to filter by ("today", "7d", "30d", "all")
+ * @param resolveMeta - Optional function to resolve map metadata (title, thumbnail)
+ * @returns Array of MapData sorted by time played (descending)
+ * 
+ * @example
+ * ```ts
+ * const maps = getTopMaps("7d", (id) => mapMetaCache.get(id));
+ * console.log(maps[0].title, maps[0].timePlayed); // "Box Fights" "14h 30m"
+ * ```
+ */
 export function getTopMaps(range: TimeRange, resolveMeta?: MapMetaResolver): MapData[] {
     const store = topMapsStore.read();
     const now = Date.now();
 
     const fromTs = rangeStartTs(range, now);
-    const keys = Object.keys(store.dailyTotals); // YYYY-MM-DD
+    const keys = Object.keys(store.dailyTotals);
 
-    // 1) Sum totals per map for the selected range
+    // Aggregate totals per map for the selected range
     const totals = new Map<string, number>();
     const playCount = new Map<string, number>();
-    let lastPlayedByMap = new Map<string, string>(); // ISO date string
+    const lastPlayedByMap = new Map<string, string>();
 
     for (const k of keys) {
         const ts = new Date(k).getTime();
@@ -71,16 +175,16 @@ export function getTopMaps(range: TimeRange, resolveMeta?: MapMetaResolver): Map
             const ms = maps[map_id] ?? 0;
             totals.set(map_id, (totals.get(map_id) ?? 0) + ms);
 
-            // playCount (rough): count a "played day" as 1. If you want true sessions, use sessions list.
-            if (ms > 0) playCount.set(map_id, (playCount.get(map_id) ?? 0) + 1);
-
-            // lastPlayed = most recent dayKey that has ms
-            if (ms > 0) lastPlayedByMap.set(map_id, k);
+            // Count days played (rough play count)
+            if (ms > 0) {
+                playCount.set(map_id, (playCount.get(map_id) ?? 0) + 1);
+                lastPlayedByMap.set(map_id, k);
+            }
         }
     }
 
-    // 2) Build trend arrays for last 7 days (always momentum)
-    const trendKeys = lastNDaysKeys(7, now);
+    // Build trend arrays (always last 7 days for momentum display)
+    const trendKeys = lastNDaysKeys(TREND_DAYS, now);
     const trendByMap = new Map<string, number[]>();
 
     for (const map_id of totals.keys()) {
@@ -88,15 +192,15 @@ export function getTopMaps(range: TimeRange, resolveMeta?: MapMetaResolver): Map
         trendByMap.set(map_id, arr);
     }
 
-    // 3) Sort maps by time played (descending)
+    // Sort maps by total time played (descending)
     const sorted = [...totals.entries()]
         .sort((a, b) => b[1] - a[1])
         .map(([map_id, totalMs]) => ({ map_id, totalMs }));
 
-    // 4) Convert to MapData rows
+    // Transform to MapData format
     const rows: MapData[] = sorted.map((item, idx) => {
         const meta = resolveMeta?.(item.map_id) ?? {};
-        const trend = trendByMap.get(item.map_id) ?? Array(7).fill(0);
+        const trend = trendByMap.get(item.map_id) ?? Array(TREND_DAYS).fill(0);
 
         return {
             map_id: item.map_id,
