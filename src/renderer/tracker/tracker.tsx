@@ -27,7 +27,7 @@ import { useAppVersion } from '../hooks/useAppVersion';
 import { useWindowInfo } from '../hooks/useWindowInfo';
 import Overview from './views/Overview';
 import { useMapsData } from '../hooks/useMapsData';
-import { TopMapsPage } from './views/TopMaps/TopMaps';
+import TopMapsPage from './views/TopMaps/TopMaps';
 import useViewMode from '../hooks/useViewMode';
 import Dashboards from './views/Dashboards';
 import Recommendations from './views/Recommendations';
@@ -272,8 +272,8 @@ const Tracker: React.FC = () => {
     title: string;
     onClick: () => void;
   }> = [
-    ...(releaseNotesEntry && isFTUEComplete
-      ? [
+      ...(releaseNotesEntry && isFTUEComplete
+        ? [
           {
             icon: releaseNotesViewed ? '📰' : '✨',
             title: releaseNotesViewed
@@ -282,18 +282,18 @@ const Tracker: React.FC = () => {
             onClick: handleReleaseNotesOpen,
           },
         ]
-      : []),
-    {
-      icon: '📝',
-      title: 'Submit Feedback',
-      onClick: handleSubmissionFormClick,
-    },
-    {
-      icon: '⚙️',
-      title: 'Settings',
-      onClick: handleSettingsClick,
-    },
-  ];
+        : []),
+      {
+        icon: '📝',
+        title: 'Submit Feedback',
+        onClick: handleSubmissionFormClick,
+      },
+      {
+        icon: '⚙️',
+        title: 'Settings',
+        onClick: handleSettingsClick,
+      },
+    ];
 
   return (
     <>
@@ -329,9 +329,8 @@ const Tracker: React.FC = () => {
                       <button
                         key={tab.mode}
                         onClick={() => handleViewModeChange(tab.mode)}
-                        className={`view-mode-tab ${
-                          viewMode === tab.mode ? 'active' : ''
-                        }`}
+                        className={`view-mode-tab ${viewMode === tab.mode ? 'active' : ''
+                          }`}
                       >
                         {tab.icon} {tab.label}
                       </button>
