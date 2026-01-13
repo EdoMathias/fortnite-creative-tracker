@@ -213,3 +213,82 @@
 .release-notes-body strong {
   color: rgba(255, 255, 255, 0.95);
 }
+
+/* ------------------------------
+   Launching Overlay
+--------------------------------*/
+
+.launching-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+  border-radius: var(--radius);
+  animation: launchingFadeIn 0.2s ease-out;
+}
+
+@keyframes launchingFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.launching-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px 48px;
+  background-color: rgba(22, 25, 37, 0.95);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.launching-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(52, 211, 153, 0.2);
+  border-top-color: rgba(52, 211, 153, 1);
+  border-radius: 50%;
+  animation: launchingSpin 0.8s linear infinite;
+}
+
+@keyframes launchingSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.launching-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.launching-fallback {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 8px;
+}
+
+.launching-fallback-link {
+  color: rgba(52, 211, 153, 1);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.launching-fallback-link:hover {
+  color: rgba(52, 211, 153, 0.8);
+}

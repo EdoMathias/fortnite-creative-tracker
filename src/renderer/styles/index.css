@@ -27,6 +27,7 @@
 @import './views/settings.css';
 @import './views/ftue.css';
 @import './views/ingame.css';
+@import './views/dashboard.css';
 
 /* 
  * CSS Modules Migration Guide:

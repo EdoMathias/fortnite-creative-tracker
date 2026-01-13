@@ -130,6 +130,9 @@ const TrendMini: React.FC<TrendMiniProps> = ({
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
+        legend: {
+          display: false,
+        },
         tooltip: {
           enabled: true,
           backgroundColor: 'rgba(30, 30, 46, 0.95)',
