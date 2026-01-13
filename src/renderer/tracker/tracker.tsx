@@ -22,7 +22,6 @@ import {
   ReleaseNoteEntry,
   RELEASE_NOTES_STORAGE_KEY,
 } from '../services/ReleaseNotesService';
-import { WidgetContainer } from '../widgets';
 import { gameTimeService } from '../../shared/services/GameTimeService';
 import '../styles/index.css';
 import { useAppVersion } from '../hooks/useAppVersion';
@@ -33,6 +32,7 @@ import TopMapsPage from './views/TopMaps/TopMaps';
 import useViewMode from '../hooks/useViewMode';
 import Dashboards from './views/Dashboard/Dashboards';
 import Library from './views/Library';
+import Widgets from './views/Widgets';
 
 const logger = createLogger('Tracker');
 
@@ -352,7 +352,7 @@ const Tracker: React.FC = () => {
 
                   {viewMode === 'library' && <Library />}
 
-                  {viewMode === 'widgets' && <WidgetContainer />}
+                  {viewMode === 'widgets' && <Widgets />}
                 </div>
               </>
             )}
