@@ -27,7 +27,7 @@ import { gameTimeService } from '../../shared/services/GameTimeService';
 import '../styles/index.css';
 import { useAppVersion } from '../hooks/useAppVersion';
 import { useWindowInfo } from '../hooks/useWindowInfo';
-import Overview from './views/Overview';
+import Overview from './views/Overview/Overview';
 import { useMapsData } from '../hooks/useMapsData';
 import TopMapsPage from './views/TopMaps/TopMaps';
 import useViewMode from '../hooks/useViewMode';
