@@ -20,49 +20,37 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   showHotkey = true,
   actionButtons = []
 }) => {
-  const windowRef = useRef<WindowBase | null>(null);
 
-  // Cache the window reference on mount so drag can be called synchronously
-  // this fixed an issue where the window enchored to the center of the screen 
-  // when starting to drag the window
-  useEffect(() => {
-    Windows.Self().then((window) => {
-      windowRef.current = window;
-    }).catch((error) => {
-      console.error('Error getting window reference:', error);
-    });
-  }, []);
-
-  const handleDragStart = useCallback(() => {
-    if (windowRef.current) {
-      windowRef.current.move().catch((error) => {
+  const handleDragStart = useCallback(async () => {
+    if (await Windows.Self()) {
+      await (await Windows.Self()).move().catch((error) => {
         console.error('Error initiating window drag:', error);
       });
     }
   }, []);
 
-  const handleMinimize = useCallback(() => {
-    if (windowRef.current) {
-      windowRef.current.minimize().catch((error) => {
+  const handleMinimize = useCallback(async () => {
+    if (await Windows.Self()) {
+      (await Windows.Self()).minimize().catch((error) => {
         console.error('Error minimizing window:', error);
       });
     }
   }, []);
 
   const handleRestore = useCallback(async () => {
-    if (windowRef.current) {
-      const windowState = await windowRef.current.getWindowState();
+    if (await Windows.Self()) {
+      const windowState = await (await Windows.Self()).getWindowState();
       if (windowState === 'maximized') {
-        await windowRef.current.restore();
+        await (await Windows.Self()).restore();
       } else {
-        await windowRef.current.maximize();
+        await (await Windows.Self()).maximize();
       }
     }
   }, []);
 
-  const handleClose = useCallback(() => {
-    if (windowRef.current) {
-      windowRef.current.close().catch((error) => {
+  const handleClose = useCallback(async () => {
+    if (await Windows.Self()) {
+      (await Windows.Self()).close().catch((error) => {
         console.error('Error closing window:', error);
       });
     }
