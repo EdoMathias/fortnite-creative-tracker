@@ -32,7 +32,7 @@ import { useMapsData } from '../hooks/useMapsData';
 import TopMapsPage from './views/TopMaps/TopMaps';
 import useViewMode from '../hooks/useViewMode';
 import Dashboards from './views/Dashboard/Dashboards';
-import Recommendations from './views/Recommendations';
+import Library from './views/Library';
 
 const logger = createLogger('Tracker');
 
@@ -350,7 +350,7 @@ const Tracker: React.FC = () => {
 
                   {viewMode === 'dashboards' && <Dashboards />}
 
-                  {viewMode === 'recommendations' && <Recommendations />}
+                  {viewMode === 'library' && <Library />}
 
                   {viewMode === 'widgets' && <WidgetContainer />}
                 </div>

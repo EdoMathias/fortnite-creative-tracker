@@ -1,0 +1,386 @@
+/* =========================
+   Library Page
+   ========================= */
+
+.library-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 18px;
+}
+
+/* ------------------------------
+   Header
+--------------------------------*/
+
+.library-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.library-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.library-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0;
+}
+
+.library-subtitle {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+}
+
+.library-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ------------------------------
+   Sort Selector
+--------------------------------*/
+
+.library-sort-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.library-sort-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.library-sort-select {
+  appearance: none;
+  padding: 8px 32px 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+
+  /* Custom dropdown arrow */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.library-sort-select:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.library-sort-select:focus {
+  outline: none;
+  border-color: rgba(45, 244, 167, 0.5);
+}
+
+.library-sort-select option {
+  background: #1a1a1a;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ------------------------------
+   Search Box
+--------------------------------*/
+
+.library-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: border-color 120ms ease, background 120ms ease;
+  min-width: 200px;
+}
+
+.library-search-box:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.library-search-box:focus-within {
+  border-color: rgba(45, 244, 167, 0.5);
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.library-search-icon {
+  font-size: 14px;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.library-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 500;
+  outline: none;
+  min-width: 0;
+}
+
+.library-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.library-search-clear {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 10px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+  flex-shrink: 0;
+}
+
+.library-search-clear:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ------------------------------
+   Filter Tabs
+--------------------------------*/
+
+.library-filter-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  width: fit-content;
+}
+
+.library-filter-tab {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.library-filter-tab:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.library-filter-tab.active {
+  background: rgba(45, 244, 167, 0.12);
+  border-color: rgba(45, 244, 167, 0.4);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.library-filter-count {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.library-filter-tab.active .library-filter-count {
+  background: rgba(45, 244, 167, 0.2);
+  color: rgba(45, 244, 167, 0.95);
+}
+
+/* ------------------------------
+   Library List
+--------------------------------*/
+
+.library-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ------------------------------
+   Library Row
+--------------------------------*/
+
+.library-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 100px 80px 110px 80px;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.library-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Favorite Button */
+.library-favorite-btn {
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.library-favorite-btn:hover {
+  background: rgba(255, 200, 50, 0.1);
+  border-color: rgba(255, 200, 50, 0.3);
+  transform: scale(1.05);
+}
+
+.library-favorite-btn.active {
+  color: #ffc832;
+  background: rgba(255, 200, 50, 0.15);
+  border-color: rgba(255, 200, 50, 0.35);
+}
+
+/* Map Info */
+.library-map-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.library-map-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.library-map-code {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: 'Consolas', 'Monaco', monospace;
+}
+
+/* Stats */
+.library-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.library-stat-value {
+  font-size: 15px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.library-stat-playtime .library-stat-value {
+  color: rgba(45, 244, 167, 0.95);
+}
+
+.library-stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Play Button */
+.library-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.library-play-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+
+.library-play-btn:hover {
+  background: rgba(45, 244, 167, 0.1);
+  border-color: rgba(45, 244, 167, 0.45);
+  transform: translateY(-1px);
+}
+
+/* ------------------------------
+   Empty State
+--------------------------------*/
+
+.library-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 24px;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+}
+
+.library-empty-icon {
+  font-size: 40px;
+  opacity: 0.8;
+}
+
+.library-empty-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.library-empty-hint {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.45);
+  max-width: 300px;
+}

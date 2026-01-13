@@ -10,7 +10,7 @@ export const useViewMode = () => {
         { mode: 'overview', label: 'Overview', icon: '🏠' },
         { mode: 'top-maps', label: 'Top Maps', icon: '🗺️' },
         { mode: 'dashboards', label: 'Dashboards', icon: '📊' },
-        { mode: 'recommendations', label: 'Recommendations', icon: '💡' },
+        { mode: 'library', label: 'Library', icon: '📚' },
         { mode: 'widgets', label: 'Widgets', icon: '🧩' },
     ];
 
