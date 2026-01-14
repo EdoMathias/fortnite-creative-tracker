@@ -1,20 +1,10 @@
 import React from 'react';
-import { TimeRange } from '../../../../../shared/consts';
-import {
-  USE_MOCK_DATA,
-  formatTime,
-  mockRecentSessionsByRange,
-  emptyRecentSessions,
-} from '../utils';
+import { useDashboard } from '../DashboardContext';
+import { formatTime } from '../utils';
 
-interface RecentSessionsProps {
-  timeRange: TimeRange;
-}
-
-const RecentSessions: React.FC<RecentSessionsProps> = ({ timeRange }) => {
-  const recentSessions = USE_MOCK_DATA
-    ? mockRecentSessionsByRange[timeRange]
-    : emptyRecentSessions[timeRange];
+const RecentSessions: React.FC = () => {
+  const { data } = useDashboard();
+  const recentSessions = data.recentSessions;
 
   return (
     <div className="dashboard-chart-card">

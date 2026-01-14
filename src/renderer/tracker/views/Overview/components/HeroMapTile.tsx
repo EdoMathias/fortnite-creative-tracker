@@ -30,9 +30,10 @@ const HeroMapTile: React.FC<HeroMapTileProps> = ({ map, onLaunch }) => {
           }}
         >
           <div className="overview-hero-content">
-            <h2 className="overview-hero-title">{map.title}</h2>
+            <h2 className="overview-hero-title">{map.title || map.map_id}</h2>
             <div className="overview-hero-meta">
               <span className="overview-hero-code">{map.map_id}</span>
+              <span className="overview-hero-time">{map.timePlayed}</span>
               <span className="overview-hero-label">• Most Played This Week</span>
             </div>
             <button

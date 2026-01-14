@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { MapData, TimeRange } from '../../../../../shared/consts';
 import RankBadge from './RankBadge';
 import MapInfo from './MapInfo';
@@ -18,7 +18,7 @@ const TableRow: React.FC<TableRowProps> = ({ map, timeRange, onPlay }) => {
     return (
         <div className="maps-grid maps-grid--row">
             <div><RankBadge rank={map.rank} /></div>
-            <div><MapInfo title={map.title ?? map.map_id} map_id={map.map_id} /></div>
+            <div><MapInfo title={map.title} map_id={map.map_id} /></div>
             <div className="col-time">
                 <span className="time-value">{map.timePlayed}</span>
             </div>

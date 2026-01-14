@@ -20,8 +20,8 @@ import TableRow from './components/TableRow';
 /** Status of the data fetch operation */
 type FetchStatus = 'loading' | 'success' | 'error';
 
-/** Whether to use mock data (for development) */
-const USE_MOCK_DATA = true;
+/** Use real data from the backend */
+const USE_MOCK_DATA = false;
 
 const logger = createLogger('TopMapsPage');
 

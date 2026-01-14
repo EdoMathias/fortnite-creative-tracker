@@ -142,13 +142,19 @@ export function getTopMaps(range: TimeRange, resolveMeta?: MapMetaResolver): Map
 
     // Transform to MapData format
     const rows: MapData[] = sorted.map((item, idx) => {
-        const meta = resolveMeta?.(item.map_id) ?? {};
+        // First try external resolver, then fallback to store's map metadata
+        const externalMeta = resolveMeta?.(item.map_id);
+        const storedMeta = store.maps?.[item.map_id];
+        
+        const title = externalMeta?.title ?? storedMeta?.title;
+        const thumbnail = externalMeta?.thumbnail ?? storedMeta?.thumbnail;
+        
         const trend = trendByMap.get(item.map_id) ?? Array(TREND_DAYS).fill(0);
 
         return {
             map_id: item.map_id,
-            title: meta.title,
-            thumbnail: meta.thumbnail,
+            title,
+            thumbnail,
             rank: idx + 1,
             timePlayed: formatDuration(item.totalMs),
             trend,

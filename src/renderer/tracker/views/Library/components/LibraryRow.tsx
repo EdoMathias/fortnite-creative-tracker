@@ -34,8 +34,8 @@ const LibraryRow: React.FC<LibraryRowProps> = ({
       </button>
 
       <div className="library-map-info">
-        <span className="library-map-title">{map.title ?? 'Unknown Map'}</span>
-        <span className="library-map-code">{map.map_id}</span>
+        <span className="library-map-title">{map.title || map.map_id}</span>
+        {map.title && <span className="library-map-code">{map.map_id}</span>}
       </div>
 
       <div className="library-stat library-stat-playtime">

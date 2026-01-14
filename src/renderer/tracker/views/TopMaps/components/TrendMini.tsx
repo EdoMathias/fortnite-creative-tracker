@@ -144,7 +144,16 @@ const TrendMini: React.FC<TrendMiniProps> = ({
           displayColors: false,
           callbacks: {
             title: (items: any[]) => items[0]?.label || '',
-            label: (item: any) => `${item.raw} mins`,
+            label: (item: any) => {
+              const ms = item.raw as number;
+              const totalMinutes = Math.floor(ms / 60000);
+              const hours = Math.floor(totalMinutes / 60);
+              const minutes = totalMinutes % 60;
+              if (hours > 0) {
+                return `${hours}h ${minutes}m`;
+              }
+              return `${minutes}m`;
+            },
           },
         },
       },

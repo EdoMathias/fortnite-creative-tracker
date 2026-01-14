@@ -53,18 +53,34 @@ export type MapSession = {
     endedAt: number;
 };
 
+/** Metadata for a map (title, thumbnail, etc.) */
+export type MapMetadata = {
+    title?: string;
+    thumbnail?: string;
+    /** Last time this metadata was updated */
+    updatedAt?: number;
+};
+
 /** 
  * Daily totals organized by date and map ID.
  * Structure: { "YYYY-MM-DD": { "map_id": milliseconds } }
  */
 export type DailyTotals = Record<string, Record<string, number>>;
 
-/** Version 1 of the store schema */
-export type StoreV1 = {
-    version: 1;
+/** 
+ * Map metadata index by map ID.
+ * Structure: { "map_id": { title, thumbnail, updatedAt } }
+ */
+export type MapMetadataIndex = Record<string, MapMetadata>;
+
+/** Store schema */
+export type Store = {
+    version: 2;
     activeSession: ActiveSession | null;
     sessions: MapSession[];
     dailyTotals: DailyTotals;
+    /** Map metadata index for titles, thumbnails, etc. */
+    maps: MapMetadataIndex;
     lastCleanupAt?: number;
 };
 
@@ -73,10 +89,10 @@ export type StoreV1 = {
 // ============================================================================
 
 /** IndexedDB storage instance */
-const storage = new IndexedDBStorage<StoreV1>(DB_NAME, STORE_NAME);
+const storage = new IndexedDBStorage<Store>(DB_NAME, STORE_NAME);
 
 /** In-memory cache of the store state */
-let cachedStore: StoreV1 | null = null;
+let cachedStore: Store | null = null;
 
 /** Whether initialization has completed */
 let isInitialized = false;
@@ -100,12 +116,13 @@ function nowMs(): number {
  * Create an empty store with default values.
  * @returns A new empty store
  */
-function createEmptyStore(): StoreV1 {
+function createEmptyStore(): Store {
     return {
-        version: 1,
+        version: 2,
         activeSession: null,
         sessions: [],
         dailyTotals: {},
+        maps: {},
     };
 }
 
@@ -113,19 +130,19 @@ function createEmptyStore(): StoreV1 {
  * Load the store from IndexedDB.
  * @returns The loaded store or null if none exists
  */
-async function loadFromDB(): Promise<StoreV1 | null> {
+async function loadFromDB(): Promise<Store | null> {
     try {
         const data = await storage.get(STORE_KEY);
-        if (data && data.version === 1) {
-            return {
-                version: 1,
-                activeSession: data.activeSession ?? null,
-                sessions: data.sessions ?? [],
-                dailyTotals: data.dailyTotals ?? {},
-                lastCleanupAt: data.lastCleanupAt,
-            };
-        }
-        return null;
+        if (!data) return null;
+
+        return {
+            version: 2,
+            activeSession: data.activeSession ?? null,
+            sessions: data.sessions ?? [],
+            dailyTotals: data.dailyTotals ?? {},
+            maps: data.maps ?? {},
+            lastCleanupAt: data.lastCleanupAt,
+        };
     } catch (error) {
         console.error('[TopMapsStore] Failed to load from IndexedDB:', error);
         return null;
@@ -162,7 +179,7 @@ function saveAsync(): void {
  * @returns The cached store
  * @throws Error if not initialized
  */
-function getStore(): StoreV1 {
+function getStore(): Store {
     if (!isInitialized || !cachedStore) {
         throw new Error('[TopMapsStore] Store not initialized. Call init() first.');
     }
@@ -210,7 +227,7 @@ function addToDailyTotals(
  * @param store - The store to clean up
  * @param now - Current timestamp
  */
-function cleanup(store: StoreV1, now: number): void {
+function cleanup(store: Store, now: number): void {
     const last = store.lastCleanupAt ?? 0;
     if (now - last < CLEANUP_INTERVAL_MS) return;
 
@@ -235,7 +252,7 @@ function cleanup(store: StoreV1, now: number): void {
  * @param store - The store containing the active session
  * @param endAt - Timestamp to end the session at
  */
-function endActiveSessionInternal(store: StoreV1, endAt: number): void {
+function endActiveSessionInternal(store: Store, endAt: number): void {
     const active = store.activeSession;
     if (!active) return;
 
@@ -319,8 +336,9 @@ export const topMapsStore = {
      * Start a new map session.
      * If another session is active, it will be closed first.
      * @param map_id - The map code to start tracking
+     * @param metadata - Optional metadata (title, thumbnail) to store for this map
      */
-    start(map_id: string): void {
+    start(map_id: string, metadata?: { title?: string; thumbnail?: string }): void {
         const store = getStore();
         const now = nowMs();
 
@@ -330,6 +348,17 @@ export const topMapsStore = {
         }
 
         store.activeSession = { map_id, startedAt: now };
+
+        // Update map metadata if provided
+        if (metadata?.title || metadata?.thumbnail) {
+            store.maps[map_id] = {
+                ...store.maps[map_id],
+                title: metadata.title ?? store.maps[map_id]?.title,
+                thumbnail: metadata.thumbnail ?? store.maps[map_id]?.thumbnail,
+                updatedAt: now,
+            };
+        }
+
         saveAsync();
     },
 
@@ -377,8 +406,54 @@ export const topMapsStore = {
      * Read the current store state (synchronous after init).
      * @returns The current store data (readonly use recommended)
      */
-    read(): StoreV1 {
+    read(): Store {
         return getStore();
+    },
+
+    /**
+     * Get metadata for a specific map.
+     * @param map_id - The map code to get metadata for
+     * @returns The map metadata or undefined if not found
+     */
+    getMapMetadata(map_id: string): MapMetadata | undefined {
+        const store = getStore();
+        return store.maps[map_id];
+    },
+
+    /**
+     * Update metadata for a specific map.
+     * @param map_id - The map code to update
+     * @param metadata - The metadata to update
+     */
+    updateMapMetadata(map_id: string, metadata: { title?: string; thumbnail?: string }): void {
+        const store = getStore();
+        store.maps[map_id] = {
+            ...store.maps[map_id],
+            title: metadata.title ?? store.maps[map_id]?.title,
+            thumbnail: metadata.thumbnail ?? store.maps[map_id]?.thumbnail,
+            updatedAt: nowMs(),
+        };
+        saveAsync();
+    },
+
+    /**
+     * Get total time played for a specific map (in milliseconds).
+     * Includes time from all completed sessions.
+     * @param map_id - The map code to get time for
+     * @returns Total milliseconds played on this map
+     */
+    getTotalTimeForMap(map_id: string): number {
+        const store = getStore();
+        let total = 0;
+
+        // Sum from all daily totals
+        for (const dayTotals of Object.values(store.dailyTotals)) {
+            if (dayTotals[map_id]) {
+                total += dayTotals[map_id];
+            }
+        }
+
+        return total;
     },
 
     /**

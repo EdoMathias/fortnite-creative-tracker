@@ -17,6 +17,18 @@ export enum MessageType {
   CUSTOM = 'custom',
   TOP_MAPS_REQUEST = "top-maps-request",
   TOP_MAPS_UPDATED = "top-maps-updated",
+  /** Request dashboard data for a time range */
+  DASHBOARD_REQUEST = "dashboard-request",
+  /** Dashboard data response */
+  DASHBOARD_UPDATED = "dashboard-updated",
+  /** Request library data (all maps) */
+  LIBRARY_REQUEST = "library-request",
+  /** Library data response */
+  LIBRARY_UPDATED = "library-updated",
+  /** Request overview stats */
+  OVERVIEW_REQUEST = "overview-request",
+  /** Overview stats response */
+  OVERVIEW_UPDATED = "overview-updated",
 }
 
 /**

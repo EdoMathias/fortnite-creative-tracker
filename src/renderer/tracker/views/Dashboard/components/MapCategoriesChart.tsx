@@ -1,24 +1,11 @@
 import React, { useMemo } from 'react';
 import { Doughnut } from 'react-chartjs-2';
-import { TimeRange } from '../../../../../shared/consts';
-import {
-  USE_MOCK_DATA,
-  formatTime,
-  mockCategoryDataByRange,
-  emptyCategoryData,
-  categoryColors,
-} from '../utils';
+import { useDashboard } from '../DashboardContext';
+import { formatTime, categoryColors } from '../utils';
 
-interface MapCategoriesChartProps {
-  timeRange: TimeRange;
-}
-
-const MapCategoriesChart: React.FC<MapCategoriesChartProps> = ({
-  timeRange,
-}) => {
-  const categoryData = USE_MOCK_DATA
-    ? mockCategoryDataByRange[timeRange]
-    : emptyCategoryData[timeRange];
+const MapCategoriesChart: React.FC = () => {
+  const { data } = useDashboard();
+  const categoryData = data.categoryData;
 
   const chartData = useMemo(
     () => ({

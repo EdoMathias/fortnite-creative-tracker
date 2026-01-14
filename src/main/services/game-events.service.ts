@@ -1,5 +1,5 @@
 import { OWGames } from '@overwolf/overwolf-api-ts';
-import { kGamesFeatures, TimeRange } from '../../shared/consts';
+import { kGamesFeatures, MapUpdateMessage, MapUpdatePayload, TimeRange } from '../../shared/consts';
 import { createLogger } from '../../shared/services/Logger';
 import { gameTimeService } from '../../shared/services/GameTimeService';
 import { MessageChannel, MessageType } from './MessageChannel';
@@ -92,14 +92,26 @@ export class GameEventsService {
     logger.log('Registering required features');
     this.enabledFeatures = await this.setRequiredFeatures(features, 30);
 
-    overwolf.games.events.getInfo((info) => {
-      if (info.res.match_info) {
-        const currentMap = JSON.parse(info.res.match_info.creative_map);
-        logger.log('Current map', currentMap);
-
-        this.broadcastMapUpdate(currentMap);
-      }
-    });
+    // Check if player is already in a map when the app launches
+    // Small delay to ensure tracker window has initialized its message listeners
+    setTimeout(() => {
+      overwolf.games.events.getInfo((info) => {
+        if (info.res?.match_info?.creative_map) {
+          const currentMap = JSON.parse(info.res.match_info.creative_map);
+          const mapId = currentMap?.map_id as string | undefined;
+          const mapTitle = currentMap?.title as string | undefined;
+          
+          if (mapId) {
+            logger.log('Player already in map on launch:', mapId, 'title:', mapTitle);
+            this._activeMapId = mapId;
+            this._isInLobby = false;
+            topMapsStore.start(mapId, { title: mapTitle });
+          }
+          
+          this.broadcastMapUpdate(currentMap);
+        }
+      });
+    }, 500);
 
     return this.enabledFeatures;
   }
@@ -244,6 +256,9 @@ export class GameEventsService {
       return;
     }
 
+    // Debug: Log raw info to see the structure
+    logger.log('Raw infoListener received:', JSON.stringify(info, null, 2));
+
     // Iterate through each feature in the info object
     Object.keys(info.info).forEach((featureKey) => {
       const featureData = (info.info as any)[featureKey];
@@ -253,6 +268,7 @@ export class GameEventsService {
         info: featureData || {}
       };
 
+      logger.log('Processed infoUpdate:', { feature: featureKey, info: featureData });
       this.onInfoUpdateListener(infoUpdate);
     });
   };
@@ -329,10 +345,11 @@ export class GameEventsService {
     try {
       if (!info.info) return;
 
-      // ENTER: creative map update
-      if (info.feature === "map_info" && (info.info.creative_map as unknown as string)) {
+      // ENTER: creative map update (feature is "match_info", contains "creative_map")
+      if (info.feature === "match_info" && info.info.creative_map) {
         const currentMap = JSON.parse(info.info.creative_map as unknown as string);
         const mapId = currentMap?.map_id as string | undefined;
+        const mapTitle = currentMap?.title as string | undefined;
 
         if (mapId) {
           // If map changed, stop previous and start new
@@ -345,8 +362,9 @@ export class GameEventsService {
             this._activeMapId = mapId;
             this._isInLobby = false;
 
-            topMapsStore.start(mapId);
-            logger.log("Started map session", mapId);
+            // Pass map metadata (title) to be stored along with the session
+            topMapsStore.start(mapId, { title: mapTitle });
+            logger.log("Started map session", mapId, "title:", mapTitle);
           }
 
           this.broadcastMapUpdate(currentMap);
@@ -355,18 +373,21 @@ export class GameEventsService {
         return;
       }
 
-      // EXIT: lobby phase
-      if (info.feature === "game_info" && (info.info.phase as unknown as string) === "lobby") {
+      // EXIT: lobby phase (feature is "game_info", contains "phase")
+      //@ts-ignore
+      if (info.feature === "game_info" && info.info.phase === "lobby") {
         if (!this._isInLobby) {
           this._isInLobby = true;
 
+          const endedMapId = this._activeMapId;
           if (this._activeMapId) {
             topMapsStore.stopIfActiveMapIs(this._activeMapId);
             logger.log("Stopped map session (lobby)", this._activeMapId);
             this._activeMapId = undefined;
           }
 
-          this.broadcastMapUpdate(null);
+          // Pass the ended map ID so we include total time in the broadcast
+          this.broadcastMapUpdate(null, endedMapId);
           this.broadcastTopMaps('7d');
         }
         return;
@@ -376,17 +397,42 @@ export class GameEventsService {
     }
   }
 
-  private broadcastMapUpdate(map: any): void {
-    if (this.messageChannel) {
-      logger.log('Broadcasting map update', map);
-      this.messageChannel.broadcastMessage(
-        [kWindowNames.trackerDesktop, kWindowNames.trackerIngame],
-        MessageType.MAP_UPDATED,
-        map
-      ).catch((error) => {
-        logger.error('Error broadcasting map update:', error);
-      });
-    }
+  /**
+   * Broadcast map update to tracker windows.
+   * Includes both the map data and the current active session.
+   * @param map - The map payload (or null when leaving a map)
+   * @param endedMapId - If a session just ended, include this map_id to send total time
+   */
+  private broadcastMapUpdate(map: MapUpdatePayload | null, endedMapId?: string): void {
+    if (!this.messageChannel) return;
+
+    const store = topMapsStore.read();
+    
+    // If a session just ended, include info about it
+    const sessionEnded = endedMapId 
+      ? { map_id: endedMapId, totalTimeMs: topMapsStore.getTotalTimeForMap(endedMapId) }
+      : undefined;
+
+    const message: MapUpdateMessage = {
+      map,
+      activeSession: store.activeSession,
+      sessionEnded,
+    };
+
+    logger.log('Broadcasting map update:', {
+      mapId: map?.map_id ?? null,
+      activeSessionMapId: store.activeSession?.map_id ?? null,
+      hasActiveSession: store.activeSession !== null,
+      sessionEnded,
+    });
+
+    this.messageChannel.broadcastMessage(
+      [kWindowNames.trackerDesktop, kWindowNames.trackerIngame],
+      MessageType.MAP_UPDATED,
+      message
+    ).catch((error) => {
+      logger.error('Error broadcasting map update:', error);
+    });
   }
 
   /**
@@ -409,9 +455,9 @@ export class GameEventsService {
    */
   private broadcastTopMaps(range: TimeRange): void {
     if (!this.messageChannel) return;
-  
+
     const maps = getTopMaps(range /*, metaResolver optional */);
-  
+
     this.messageChannel.broadcastMessage(
       [kWindowNames.trackerDesktop, kWindowNames.trackerIngame],
       MessageType.TOP_MAPS_UPDATED,

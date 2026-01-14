@@ -1,26 +1,28 @@
 import React from 'react';
 import { useMapsData } from '../../../hooks/useMapsData';
+import { useOverviewStats } from '../../../hooks/useOverviewStats';
+import { useTopMap } from '../../../hooks/useTopMap';
 import { useLaunching } from '../../../contexts/LaunchingContext';
+import { MessageChannel } from '../../../../main/services/MessageChannel';
 import { StatsRow, HeroMapTile, RecentMapsTile } from './components';
 
-const Overview: React.FC = () => {
-  const { topMaps, recentMaps } = useMapsData();
+interface OverviewProps {
+  messageChannel: MessageChannel;
+}
+
+const Overview: React.FC<OverviewProps> = ({ messageChannel }) => {
+  const { recentMaps } = useMapsData();
+  const { stats } = useOverviewStats(messageChannel);
+  const { topMap } = useTopMap(messageChannel);
   const { launchMap } = useLaunching();
-
-  const topMap = topMaps && topMaps.length > 0 ? topMaps[0] : null;
-  const mapsPlayedCount = recentMaps?.length ?? 0;
-
-  // TODO: Replace with actual data from tracking service
-  const totalPlaytime = '--:--';
-  const avgSession = '--:--';
 
   return (
     <div className="overview-container">
       {/* Row 1: Stats tiles */}
       <StatsRow
-        totalPlaytime={totalPlaytime}
-        mapsPlayed={mapsPlayedCount}
-        avgSession={avgSession}
+        totalPlaytime={stats.totalPlaytime}
+        mapsPlayed={stats.mapsPlayed}
+        avgSession={stats.avgSession}
       />
 
       {/* Row 2: Top played map hero */}

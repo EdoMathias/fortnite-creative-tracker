@@ -1,12 +1,14 @@
 import { GameStateService } from '../services/game-state.service';
 import { HotkeysService } from '../services/hotkeys.service';
 import { AppLaunchService } from '../services/app-launch.service';
-import { MessageChannel, MessageType } from '../services/MessageChannel';
+import { MessageChannel, MessageType, MessagePayload } from '../services/MessageChannel';
 import { GameEventsService } from '../services/game-events.service';
-import { kHotkeys } from '../../shared/consts';
+import { kHotkeys, kWindowNames, TimeRange } from '../../shared/consts';
 import { createLogger } from '../../shared/services/Logger';
 import { WindowsController } from './windows.controller';
 import { topMapsStore } from '../services/top-maps/top-maps.store';
+import { getTopMaps } from '../services/top-maps/top-maps.facade';
+import { getDashboardData, getLibraryData, getOverviewStats } from '../services/top-maps/dashboard-data.facade';
 
 const logger = createLogger('BackgroundController');
 
@@ -131,6 +133,61 @@ export class BackgroundController {
     // Listen for window state changes from other windows
     this._messageChannel.onMessage(MessageType.TRACKER_WINDOW_SWITCHED, (payload) => {
       logger.debug('Window switched:', payload);
+    });
+
+    // Handle top maps data requests
+    this._messageChannel.onMessage(MessageType.TOP_MAPS_REQUEST, (payload: MessagePayload) => {
+      const range = (payload.data?.range as TimeRange) ?? '7d';
+      logger.debug('Top maps request received:', range);
+      
+      const maps = getTopMaps(range);
+      
+      // Broadcast to both tracker windows
+      this._messageChannel.broadcastMessage(
+        [kWindowNames.trackerDesktop, kWindowNames.trackerIngame],
+        MessageType.TOP_MAPS_UPDATED,
+        { range, maps }
+      ).catch(err => logger.error('Error broadcasting top maps:', err));
+    });
+
+    // Handle dashboard data requests
+    this._messageChannel.onMessage(MessageType.DASHBOARD_REQUEST, (payload: MessagePayload) => {
+      const range = (payload.data?.range as TimeRange) ?? '7d';
+      logger.debug('Dashboard request received:', range);
+      
+      const data = getDashboardData(range);
+      
+      this._messageChannel.broadcastMessage(
+        [kWindowNames.trackerDesktop, kWindowNames.trackerIngame],
+        MessageType.DASHBOARD_UPDATED,
+        { range, ...data }
+      ).catch(err => logger.error('Error broadcasting dashboard data:', err));
+    });
+
+    // Handle library data requests
+    this._messageChannel.onMessage(MessageType.LIBRARY_REQUEST, () => {
+      logger.debug('Library request received');
+      
+      const data = getLibraryData();
+      
+      this._messageChannel.broadcastMessage(
+        [kWindowNames.trackerDesktop, kWindowNames.trackerIngame],
+        MessageType.LIBRARY_UPDATED,
+        { maps: data }
+      ).catch(err => logger.error('Error broadcasting library data:', err));
+    });
+
+    // Handle overview stats requests
+    this._messageChannel.onMessage(MessageType.OVERVIEW_REQUEST, () => {
+      logger.debug('Overview request received');
+      
+      const stats = getOverviewStats();
+      
+      this._messageChannel.broadcastMessage(
+        [kWindowNames.trackerDesktop, kWindowNames.trackerIngame],
+        MessageType.OVERVIEW_UPDATED,
+        stats
+      ).catch(err => logger.error('Error broadcasting overview stats:', err));
     });
   }
 }

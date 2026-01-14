@@ -13,7 +13,9 @@ import {
 } from 'chart.js';
 
 import { TimeRange } from '../../../../shared/consts';
+import { MessageChannel } from '../../../../main/services/MessageChannel';
 import TimeRangeSelector from '../TopMaps/components/TimeRangeSelector';
+import { DashboardProvider } from './DashboardContext';
 import {
   PlaytimeTrendChart,
   MapCategoriesChart,
@@ -34,24 +36,30 @@ ChartJS.register(
   Legend
 );
 
-const Dashboards: React.FC = () => {
+interface DashboardsProps {
+  messageChannel: MessageChannel;
+}
+
+const Dashboards: React.FC<DashboardsProps> = ({ messageChannel }) => {
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h2 className="dashboard-title">Dashboard</h2>
-        <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
+    <DashboardProvider messageChannel={messageChannel} timeRange={timeRange}>
+      <div className="dashboard-container">
+        <div className="dashboard-header">
+          <h2 className="dashboard-title">Dashboard</h2>
+          <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
+        </div>
+        <div className="dashboard-row-2col">
+          <PlaytimeTrendChart />
+          <MapCategoriesChart />
+        </div>
+        <div className="dashboard-row-2col">
+          <WeekComparison />
+          <RecentSessions />
+        </div>
       </div>
-      <div className="dashboard-row-2col">
-        <PlaytimeTrendChart timeRange={timeRange} />
-        <MapCategoriesChart timeRange={timeRange} />
-      </div>
-      <div className="dashboard-row-2col">
-        <WeekComparison timeRange={timeRange} />
-        <RecentSessions timeRange={timeRange} />
-      </div>
-    </div>
+    </DashboardProvider>
   );
 };
 

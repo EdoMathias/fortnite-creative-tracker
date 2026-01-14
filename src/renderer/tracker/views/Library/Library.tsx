@@ -1,14 +1,12 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { LibraryMapData, SortOption, FilterOption } from './types';
-import { mockLibraryMaps } from './utils';
 import { SortSelector, FilterTabs, LibraryRow, SearchBox } from './components';
 import { useLaunching } from '../../../contexts/LaunchingContext';
 import { createLogger } from '../../../../shared/services';
+import { MessageChannel } from '../../../../main/services/MessageChannel';
+import { useLibraryData } from '../../../hooks/useLibraryData';
 
 const logger = createLogger('Library');
-
-/** Whether to use mock data (for development) */
-const USE_MOCK_DATA = true;
 
 /** Storage key for favorites */
 const FAVORITES_STORAGE_KEY = 'fortnite_tracker_favorites';
@@ -42,46 +40,59 @@ const saveFavorites = (favorites: Set<string>): void => {
 /**
  * Sort maps based on selected sort option
  */
+/**
+ * Get the display name for a map (title if available, otherwise map_id)
+ */
+const getMapDisplayName = (map: LibraryMapData): string => {
+  return map.title || map.map_id || '';
+};
+
 const sortMaps = (maps: LibraryMapData[], sortBy: SortOption): LibraryMapData[] => {
   const sorted = [...maps];
 
   switch (sortBy) {
     case 'total-time':
-      return sorted.sort((a, b) => b.totalPlayTime - a.totalPlayTime);
+      return sorted.sort((a, b) => (b.totalPlayTime || 0) - (a.totalPlayTime || 0));
     case 'last-played':
-      return sorted.sort((a, b) => b.lastPlayed - a.lastPlayed);
+      return sorted.sort((a, b) => (b.lastPlayed || 0) - (a.lastPlayed || 0));
     case 'first-played':
-      return sorted.sort((a, b) => a.firstPlayed - b.firstPlayed);
+      return sorted.sort((a, b) => (a.firstPlayed || 0) - (b.firstPlayed || 0));
     case 'session-count':
-      return sorted.sort((a, b) => b.playCount - a.playCount);
+      return sorted.sort((a, b) => (b.playCount || 0) - (a.playCount || 0));
     case 'a-z':
       return sorted.sort((a, b) =>
-        (a.title ?? a.map_id).localeCompare(b.title ?? b.map_id)
+        getMapDisplayName(a).localeCompare(getMapDisplayName(b))
       );
     case 'z-a':
       return sorted.sort((a, b) =>
-        (b.title ?? b.map_id).localeCompare(a.title ?? a.map_id)
+        getMapDisplayName(b).localeCompare(getMapDisplayName(a))
       );
     default:
       return sorted;
   }
 };
 
-const Library: React.FC = () => {
+interface LibraryProps {
+  messageChannel: MessageChannel;
+}
+
+const Library: React.FC<LibraryProps> = ({ messageChannel }) => {
   const [sortBy, setSortBy] = useState<SortOption>('last-played');
   const [filter, setFilter] = useState<FilterOption>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [favorites, setFavorites] = useState<Set<string>>(() => loadFavorites());
   const { launchMap } = useLaunching();
+  
+  // Use real data from the backend
+  const { maps: libraryMaps } = useLibraryData(messageChannel);
 
-  // Merge mock data with favorites state
+  // Merge real data with favorites state
   const mapsWithFavorites = useMemo((): LibraryMapData[] => {
-    const baseMaps = USE_MOCK_DATA ? mockLibraryMaps : [];
-    return baseMaps.map((map) => ({
+    return libraryMaps.map((map) => ({
       ...map,
       isFavorite: favorites.has(map.map_id),
     }));
-  }, [favorites]);
+  }, [libraryMaps, favorites]);
 
   // Apply search, filter and sort
   const displayedMaps = useMemo(() => {

@@ -1,2 +1,3 @@
-export { default } from './Widgets';
+export { default as HotkeysWidget } from './components/HotkeysWidget';
+export { default as RecentMapsWidget } from './components/RecentMapsWidget';
 export * from './types';

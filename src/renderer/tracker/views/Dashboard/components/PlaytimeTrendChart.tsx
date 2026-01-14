@@ -1,22 +1,11 @@
 import React, { useMemo } from 'react';
 import { Line } from 'react-chartjs-2';
 import { TimeRange } from '../../../../../shared/consts';
-import {
-  USE_MOCK_DATA,
-  mockPlaytimeDataByRange,
-  emptyPlaytimeData,
-} from '../utils';
+import { useDashboard } from '../DashboardContext';
 
-interface PlaytimeTrendChartProps {
-  timeRange: TimeRange;
-}
-
-const PlaytimeTrendChart: React.FC<PlaytimeTrendChartProps> = ({
-  timeRange,
-}) => {
-  const playtimeData = USE_MOCK_DATA
-    ? mockPlaytimeDataByRange[timeRange]
-    : emptyPlaytimeData[timeRange];
+const PlaytimeTrendChart: React.FC = () => {
+  const { data, timeRange } = useDashboard();
+  const playtimeData = data.playtimeTrend;
 
   const chartData = useMemo(
     () => ({

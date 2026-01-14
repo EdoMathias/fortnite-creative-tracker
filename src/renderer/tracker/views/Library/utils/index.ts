@@ -1,4 +1,7 @@
-export * from './mockLibrary';
+/**
+ * Library utility functions
+ * Note: Mock data has been removed - using real data from useLibraryData hook
+ */
 
 /**
  * Format milliseconds to human-readable time string

@@ -1,21 +1,10 @@
 import React from 'react';
-import { TimeRange } from '../../../../../shared/consts';
-import {
-  USE_MOCK_DATA,
-  formatTime,
-  mockComparisonByRange,
-  emptyComparison,
-} from '../utils';
+import { useDashboard } from '../DashboardContext';
+import { formatTime } from '../utils';
 
-interface WeekComparisonProps {
-  timeRange: TimeRange;
-}
-
-const WeekComparison: React.FC<WeekComparisonProps> = ({ timeRange }) => {
-  const comparisonData = USE_MOCK_DATA
-    ? mockComparisonByRange[timeRange]
-    : emptyComparison[timeRange];
-  const { current, previous, currentLabel, previousLabel } = comparisonData;
+const WeekComparison: React.FC = () => {
+  const { data } = useDashboard();
+  const { current, previous, currentLabel, previousLabel } = data.comparison;
 
   // Handle "all" time range where there's no previous period
   const hasPreviousData = previous.total > 0;

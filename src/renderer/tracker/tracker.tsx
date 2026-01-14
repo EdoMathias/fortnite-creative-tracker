@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import { OWHotkeys } from '@overwolf/overwolf-api-ts';
-import { kHotkeys, kGameClassIds } from '../../shared/consts';
+import { kHotkeys, kGameClassIds, MapUpdateMessage } from '../../shared/consts';
 import {
   AppHeader,
   FTUEWelcomeModal,
@@ -32,7 +32,7 @@ import TopMapsPage from './views/TopMaps/TopMaps';
 import useViewMode from '../hooks/useViewMode';
 import Dashboards from './views/Dashboard/Dashboards';
 import Library from './views/Library';
-import Widgets from './views/Widgets';
+import Widgets from './views/Widgets/Widgets';
 
 const logger = createLogger('Tracker');
 
@@ -82,9 +82,10 @@ const Tracker: React.FC = () => {
     const unregisterMapUpdate = trackerMessageChannel.onMessage(
       MessageType.MAP_UPDATED,
       (payload) => {
-        logger.log('Received MAP_UPDATED message:', payload);
+        const message = payload.data as MapUpdateMessage;
+        logger.log('Received MAP_UPDATED message:', message);
 
-        mapsData.handleMapUpdate(payload.data);
+        mapsData.handleMapUpdate(message);
       }
     );
 
@@ -274,8 +275,8 @@ const Tracker: React.FC = () => {
     title: string;
     onClick: () => void;
   }> = [
-    ...(releaseNotesEntry && isFTUEComplete
-      ? [
+      ...(releaseNotesEntry && isFTUEComplete
+        ? [
           {
             icon: releaseNotesViewed ? '📰' : '✨',
             title: releaseNotesViewed
@@ -284,18 +285,18 @@ const Tracker: React.FC = () => {
             onClick: handleReleaseNotesOpen,
           },
         ]
-      : []),
-    {
-      icon: '📝',
-      title: 'Submit Feedback',
-      onClick: handleSubmissionFormClick,
-    },
-    {
-      icon: '⚙️',
-      title: 'Settings',
-      onClick: handleSettingsClick,
-    },
-  ];
+        : []),
+      {
+        icon: '📝',
+        title: 'Submit Feedback',
+        onClick: handleSubmissionFormClick,
+      },
+      {
+        icon: '⚙️',
+        title: 'Settings',
+        onClick: handleSettingsClick,
+      },
+    ];
 
   return (
     <>
@@ -332,9 +333,8 @@ const Tracker: React.FC = () => {
                       <button
                         key={tab.mode}
                         onClick={() => handleViewModeChange(tab.mode)}
-                        className={`view-mode-tab ${
-                          viewMode === tab.mode ? 'active' : ''
-                        }`}
+                        className={`view-mode-tab ${viewMode === tab.mode ? 'active' : ''
+                          }`}
                       >
                         {tab.icon} {tab.label}
                       </button>
@@ -342,17 +342,19 @@ const Tracker: React.FC = () => {
                 </div>
 
                 <div className="view-content">
-                  {viewMode === 'overview' && <Overview />}
+                  {viewMode === 'overview' && <Overview messageChannel={trackerMessageChannel} />}
 
                   {viewMode === 'top-maps' && (
                     <TopMapsPage messageChannel={trackerMessageChannel} />
                   )}
 
-                  {viewMode === 'dashboards' && <Dashboards />}
+                  {viewMode === 'dashboards' && <Dashboards messageChannel={trackerMessageChannel} />}
 
-                  {viewMode === 'library' && <Library />}
+                  {viewMode === 'library' && <Library messageChannel={trackerMessageChannel} />}
 
-                  {viewMode === 'widgets' && <Widgets />}
+                  {viewMode === 'widgets' &&
+                    <Widgets recentMaps={mapsData.recentMaps} activeSession={mapsData.activeSession} />
+                  }
                 </div>
               </>
             )}
