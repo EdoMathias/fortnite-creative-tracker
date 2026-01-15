@@ -45,30 +45,29 @@ export const useMapsData = () => {
         // Update active session (stored in memory only - no localStorage!)
         setActiveSession(message.activeSession);
 
-        // If a session just ended, update the time for that map
-        if (message.sessionEnded) {
-            const { map_id, totalTimeMs } = message.sessionEnded;
-            const formattedTime = formatTimeMs(totalTimeMs);
+            // If a session just ended, update the time for that map (store ms)
+            if (message.sessionEnded) {
+                const { map_id, totalTimeMs } = message.sessionEnded;
 
-            const updateTimeForMap = (key: string, setter: React.Dispatch<React.SetStateAction<MapData[]>>) => {
-                const existing = localStorage.getItem(key);
-                const list: MapData[] = existing ? JSON.parse(existing) : [];
-                
-                const updatedList = list.map((item) => {
-                    if (item.map_id === map_id) {
-                        return { ...item, timePlayed: formattedTime };
-                    }
-                    return item;
-                });
-                
-                setter(updatedList);
-                localStorage.setItem(key, JSON.stringify(updatedList));
-            };
+                const updateTimeForMap = (key: string, setter: React.Dispatch<React.SetStateAction<MapData[]>>) => {
+                    const existing = localStorage.getItem(key);
+                    const list: MapData[] = existing ? JSON.parse(existing) : [];
 
-            updateTimeForMap(STORAGE_KEYS.recentMaps, setRecentMaps);
-            updateTimeForMap(STORAGE_KEYS.mapsPlayed, setMapsPlayed);
-            updateTimeForMap(STORAGE_KEYS.topMaps, setTopMaps);
-        }
+                    const updatedList = list.map((item) => {
+                        if (item.map_id === map_id) {
+                            return { ...item, timePlayedMs: totalTimeMs } as MapData;
+                        }
+                        return item;
+                    });
+
+                    setter(updatedList);
+                    localStorage.setItem(key, JSON.stringify(updatedList));
+                };
+
+                updateTimeForMap(STORAGE_KEYS.recentMaps, setRecentMaps);
+                updateTimeForMap(STORAGE_KEYS.mapsPlayed, setMapsPlayed);
+                updateTimeForMap(STORAGE_KEYS.topMaps, setTopMaps);
+            }
 
         // Only update lists if we have map data (entering a new map)
         if (!message.map) return;
@@ -83,7 +82,7 @@ export const useMapsData = () => {
             const existingIndex = list.findIndex((item: MapData) => item.map_id === mapPayload.map_id);
             
             if (existingIndex >= 0) {
-                // Update existing map - preserve timePlayed, update lastPlayed
+                // Update existing map - preserve timePlayedMs if present, update lastPlayed
                 list[existingIndex] = {
                     ...list[existingIndex],
                     title: mapPayload.title || list[existingIndex].title,
@@ -94,9 +93,9 @@ export const useMapsData = () => {
                 const newMap: MapData = {
                     map_id: mapPayload.map_id,
                     title: mapPayload.title,
-                    timePlayed: '0m',
+                    timePlayedMs: 0,
                     lastPlayed: now,
-                };
+                } as MapData;
                 list.push(newMap);
             }
             

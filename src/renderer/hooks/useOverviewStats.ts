@@ -128,6 +128,22 @@ export function useOverviewStats(messageChannel: MessageChannel): UseOverviewSta
         return () => unsubscribe();
     }, [messageChannel, requestData]);
 
+    // Listen to game time updates to refresh stats (current session time affects totals)
+    useEffect(() => {
+        const unsubscribe = messageChannel.onMessage(
+            MessageType.GAME_TIME_UPDATED,
+            () => {
+                // Refresh stats when game time updates (debounced to avoid too frequent updates)
+                const timeout = setTimeout(() => {
+                    requestData();
+                }, 2000);
+                return () => clearTimeout(timeout);
+            }
+        );
+
+        return () => unsubscribe();
+    }, [messageChannel, requestData]);
+
     // Request data on mount
     useEffect(() => {
         requestData();

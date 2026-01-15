@@ -178,6 +178,22 @@ export function useDashboardData(
         return () => clearTimeout(timeout);
     }, [requestData]);
 
+    // Listen to game time updates to refresh dashboard data (affects playtime trends)
+    useEffect(() => {
+        const unsubscribe = messageChannel.onMessage(
+            MessageType.GAME_TIME_UPDATED,
+            () => {
+                // Debounce refresh to avoid too frequent updates
+                const timeout = setTimeout(() => {
+                    requestData();
+                }, 2000);
+                return () => clearTimeout(timeout);
+            }
+        );
+
+        return () => unsubscribe();
+    }, [messageChannel, requestData]);
+
     return {
         data,
         status,
