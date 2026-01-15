@@ -4,17 +4,10 @@
  */
 
 /**
- * Format milliseconds to human-readable time string
+ * Format milliseconds to human-readable time string with seconds
+ * Re-export from shared utils for consistency
  */
-export const formatPlayTime = (ms: number): string => {
-  const hours = Math.floor(ms / (1000 * 60 * 60));
-  const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
-
-  if (hours === 0) {
-    return `${minutes}m`;
-  }
-  return `${hours}h ${minutes}m`;
-};
+export { formatPlayTime } from '../../../../../shared/utils/timeFormat';
 
 /**
  * Format timestamp to relative time string (e.g., "2 hours ago", "3 days ago")

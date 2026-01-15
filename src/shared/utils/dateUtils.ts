@@ -101,21 +101,31 @@ export function buildDailyStarts(days: number, nowMs = Date.now()): number[] {
 // ============================================================================
 
 /**
- * Format a duration in milliseconds to a human-readable string.
+ * Format a duration in milliseconds to a human-readable string with seconds.
  * 
  * @param ms - Duration in milliseconds
- * @returns Formatted string like "2h 30m" or "45m"
+ * @returns Formatted string like "2h 30m 15s" or "45m 30s" or "30s"
  * 
  * @example
- * formatDuration(9000000)  // "2h 30m"
- * formatDuration(2700000)  // "45m"
- * formatDuration(0)        // "0m"
+ * formatDuration(9000000)   // "2h 30m"
+ * formatDuration(9015000)   // "2h 30m 15s"
+ * formatDuration(2700000)   // "45m"
+ * formatDuration(2730000)   // "45m 30s"
+ * formatDuration(30000)     // "30s"
+ * formatDuration(0)          // "0s"
  */
 export function formatDuration(ms: number): string {
-    const totalMin = Math.floor(ms / MS_PER_MINUTE);
-    const h = Math.floor(totalMin / 60);
-    const m = totalMin % 60;
-    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+    const totalSec = Math.floor(ms / MS_PER_SECOND);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    
+    const parts: string[] = [];
+    if (h > 0) parts.push(`${h}h`);
+    if (m > 0) parts.push(`${m}m`);
+    if (s > 0 || parts.length === 0) parts.push(`${s}s`);
+    
+    return parts.join(' ');
 }
 
 /**

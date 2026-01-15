@@ -30,7 +30,9 @@ export type HotkeyData = {
 
 export const kBaseCreativeMapsUrl = 'https://play.fn.gg/island';
 export const kFortniteDeepLink =
-  'com.epicgames.launcher://apps/fn%3A4fe75bbc5a674f4f9b356b5c90567da5%3AFortnite?action=launch&silent=true&ref=fchq&arg=-IslandOverride=';
+  'com.epicgames.launcher://apps/fn%3A4fe75bbc5a674f4f9b356b5c90567da5%3AFortnite?action=launch&silent=true&arg=-IslandOverride=';
+
+export const kFortniteBRdeeplink = 'com.epicgames.launcher://apps/fn%3A4fe75bbc5a674f4f9b356b5c90567da5%3AFortnite?action=launch&silent=true&arg=-IslandOverride%3Dset_br_playlists';
 
 export type TrendDirection = 'up' | 'down' | 'flat';
 
@@ -38,12 +40,16 @@ export interface MapData {
   map_id: string;
   title?: string;
   thumbnail?: string;
+  description?: string;
+  plays?: number;
+  /** Unified time in milliseconds */
+  timePlayedMs: number;
   playCount?: number;
   lastPlayed?: string;
   rank?: number;
-  timePlayed?: string;
   trend?: number[];
   trendDirection?: TrendDirection;
+  isFallback?: boolean;
 }
 
 export type MapSession = {
