@@ -1,34 +1,39 @@
 import React from 'react';
 import { createLogger } from '../../shared/services/Logger';
 import { useLaunching } from '../contexts/LaunchingContext';
+import { MapData } from '../../shared/consts';
+import { formatPlayTime } from '../../shared/utils/timeFormat';
 
 const logger = createLogger('MapCard');
 
-const MapCard: React.FC<{ map: any }> = ({ map }) => {
+interface MapCardProps {
+  map: MapData;
+}
+
+const MapCard: React.FC<MapCardProps> = ({ map }) => {
   const { launchMap } = useLaunching();
-
-  const handleLaunchMap = (mapId: string) => {
-    logger.log('Launching map:', mapId);
-    launchMap(mapId);
-  };
-
-  const getMapThumbnail = (mapId: string) => {
-    return `https://creativemaps.net/api/v1/maps/${mapId}/thumbnail`;
-  };
 
   return (
     <div className="map-card">
-      <div className="map-card-thumbnail">
-        <img src={map.thumbnail} alt={map.name} />
+      <div
+        className="map-card-thumbnail"
+        style={{
+          backgroundImage: map.thumbnail ? `url(${map.thumbnail})` : 'none',
+        }}
+      >
+        {!map.thumbnail && <div className="map-card-thumbnail-placeholder" />}
       </div>
-      <div className="map-card-name">{map.title}</div>
-      <div className="map-card-code">{map.map_id}</div>
-      <div className="map-card-code">
+      <div className="map-card-content">
+        <h4 className="map-card-title" title={map.title || map.map_id}>
+          {map.title || map.map_id}
+        </h4>
+        <span className="map-card-code">{map.map_id}</span>
+        {typeof map.timePlayedMs === 'number' && (
+          <span className="map-card-time">{formatPlayTime(map.timePlayedMs)}</span>
+        )}
         <button
-          className="launch-map-button"
-          onClick={() => {
-            handleLaunchMap(map.map_id);
-          }}
+          className="map-card-launch"
+          onClick={() => launchMap(map.map_id)}
         >
           Launch Map
         </button>

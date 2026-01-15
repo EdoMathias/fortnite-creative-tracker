@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MapData, ActiveSession } from '../../../../../shared/consts';
+import { formatPlayTime } from '../../../../../shared/utils/timeFormat';
 
 interface RecentMapsWidgetProps {
   recentMaps: MapData[];
@@ -82,11 +83,11 @@ const RecentMapsWidget: React.FC<RecentMapsWidgetProps> = ({
                     <div className="recent-map-time">
                       {isCurrentlyPlaying ? (
                         <span className="recent-map-live">
-                          🟢 {formatElapsedTime(elapsedSeconds)}
+                          🟢 {formatPlayTime(elapsedSeconds * 1000)}
                         </span>
                       ) : (
                         <span className="recent-map-total">
-                          {map.timePlayed || 'No time recorded'}
+                          {typeof map.timePlayedMs === 'number' ? formatPlayTime(map.timePlayedMs) : 'No time recorded'}
                         </span>
                       )}
                     </div>

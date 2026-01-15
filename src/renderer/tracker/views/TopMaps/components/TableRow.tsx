@@ -3,6 +3,7 @@ import { MapData, TimeRange } from '../../../../../shared/consts';
 import RankBadge from './RankBadge';
 import MapInfo from './MapInfo';
 import TrendMini from './TrendMini';
+import { formatPlayTime } from '../../../../../shared/utils/timeFormat';
 
 interface TableRowProps {
     map: MapData;
@@ -20,7 +21,7 @@ const TableRow: React.FC<TableRowProps> = ({ map, timeRange, onPlay }) => {
             <div><RankBadge rank={map.rank} /></div>
             <div><MapInfo title={map.title} map_id={map.map_id} /></div>
             <div className="col-time">
-                <span className="time-value">{map.timePlayed}</span>
+                <span className="time-value">{formatPlayTime(map.timePlayedMs)}</span>
             </div>
             <div className="col-trend">
                 <TrendMini
