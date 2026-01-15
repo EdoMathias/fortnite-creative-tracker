@@ -4,6 +4,9 @@ import { createLogger } from '../../shared/services/Logger';
 import { gameTimeService } from '../../shared/services/GameTimeService';
 import { MessageChannel, MessageType } from './MessageChannel';
 import { kWindowNames } from '../../shared/consts';
+import { topMapsStore } from './top-maps/top-maps.store';
+import { getTopMaps } from './top-maps/top-maps.facade';
+import { getDashboardData, getLibraryData, getOverviewStats } from './top-maps/dashboard-data.facade';
 
 const logger = createLogger('GameEventsService');
 
@@ -11,8 +14,6 @@ import RunningGameInfo = overwolf.games.RunningGameInfo;
 import InfoUpdates2Event = overwolf.games.events.InfoUpdates2Event;
 import SetRequiredFeaturesResult = overwolf.games.events.SetRequiredFeaturesResult;
 import ErrorEvent = overwolf.games.events.ErrorEvent;
-import { topMapsStore } from './top-maps/top-maps.store';
-import { getTopMaps } from './top-maps/top-maps.facade';
 
 export interface GEPEnabledFeatures {
   enabled: string[];
@@ -126,14 +127,17 @@ export class GameEventsService {
 
     // End game time tracking session
     try {
-      gameTimeService.onGameTerminated();
-      logger.debug('Ended game time tracking session - stopped counting time');
-      this.broadcastGameTimeUpdate();
-
-      // End any active map session
+      // End any active map session first
       topMapsStore.stop();
       this._activeMapId = undefined;
       this._isInLobby = true;
+      
+      // End game time tracking (this will finalize and save the session)
+      gameTimeService.onGameTerminated();
+      logger.debug('Ended game time tracking session - stopped counting time');
+      
+      // Broadcast final game time update so widgets know to stop showing live time
+      this.broadcastGameTimeUpdate();
     } catch (error) {
       logger.error('Error ending game time tracking:', error);
     }
@@ -432,6 +436,56 @@ export class GameEventsService {
       message
     ).catch((error) => {
       logger.error('Error broadcasting map update:', error);
+    });
+
+    // When a session ends, trigger refresh of all data
+    if (sessionEnded) {
+      this.broadcastDataUpdates();
+    }
+  }
+
+  /**
+   * Broadcast updates for all data types when significant events occur (e.g., session ends)
+   */
+  private broadcastDataUpdates(): void {
+    if (!this.messageChannel) return;
+
+    // Broadcast overview stats
+    const stats = getOverviewStats();
+    this.messageChannel.broadcastMessage(
+      [kWindowNames.trackerDesktop, kWindowNames.trackerIngame],
+      MessageType.OVERVIEW_UPDATED,
+      stats
+    ).catch(err => logger.error('Error broadcasting overview stats:', err));
+
+    // Broadcast library data
+    const libraryData = getLibraryData();
+    this.messageChannel.broadcastMessage(
+      [kWindowNames.trackerDesktop, kWindowNames.trackerIngame],
+      MessageType.LIBRARY_UPDATED,
+      { maps: libraryData }
+    ).catch(err => logger.error('Error broadcasting library data:', err));
+
+    // Broadcast top maps for all ranges
+    const ranges: TimeRange[] = ['today', '7d', 'all'];
+    ranges.forEach(range => {
+      const maps = getTopMaps(range);
+      this.messageChannel!.broadcastMessage(
+        [kWindowNames.trackerDesktop, kWindowNames.trackerIngame],
+        MessageType.TOP_MAPS_UPDATED,
+        { range, maps }
+      ).catch(err => logger.error('Error broadcasting top maps:', err));
+    });
+
+    // Broadcast dashboard data for all ranges
+    const dashboardRanges: TimeRange[] = ['today', '7d', '30d'];
+    dashboardRanges.forEach(range => {
+      const data = getDashboardData(range);
+      this.messageChannel!.broadcastMessage(
+        [kWindowNames.trackerDesktop, kWindowNames.trackerIngame],
+        MessageType.DASHBOARD_UPDATED,
+        { range, ...data }
+      ).catch(err => logger.error('Error broadcasting dashboard data:', err));
     });
   }
 
