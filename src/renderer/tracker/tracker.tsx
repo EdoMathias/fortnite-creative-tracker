@@ -11,7 +11,8 @@ import {
 } from '../components';
 import { FTUEProvider, useFTUE } from '../contexts/FTUEContext';
 import { LaunchingProvider } from '../contexts/LaunchingContext';
-import { AdContainer, Settings } from './components';
+import { AdContainer } from './components';
+import Settings from './views/Settings';
 import {
   MessageChannel,
   MessageType,

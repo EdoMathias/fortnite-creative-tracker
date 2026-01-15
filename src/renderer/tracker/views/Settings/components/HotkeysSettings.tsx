@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import AnyTypeInput from '../../components/AnyTypeInput';
-import { HotkeyData, kHotkeys } from '../../../shared/consts';
-import { createLogger } from '../../../shared/services/Logger';
-import { HotkeysAPI } from '../../../shared/services/hotkeys';
+import AnyTypeInput from '../../../../components/AnyTypeInput';
+import { HotkeyData, kHotkeys } from '../../../../../shared/consts';
+import { createLogger } from '../../../../../shared/services/Logger';
+import { HotkeysAPI } from '../../../../../shared/services/hotkeys';
 
 const logger = createLogger('HotkeysSettings');
 
@@ -131,7 +131,7 @@ const fallbackCodeFromKeyEvent = (event: React.KeyboardEvent<HTMLInputElement>):
  * HotKeysSettings component allows users to configure hotkeys for various actions.
  * It provides an input field where users can set a hotkey by pressing the desired key combination.
  */
-const HotKeysSettings = () => {
+const HotkeysSettings: React.FC = () => {
   const [hotkeys, setHotkeys] = useState<overwolf.settings.hotkeys.IHotkey[]>([]);
   const [error, setError] = useState<{ hotkeyName: string; message: string } | null>(null);
   const [originalMap, setOriginalMap] = useState<Record<string, string>>({});
@@ -507,4 +507,4 @@ const HotKeysSettings = () => {
   );
 };
 
-export default HotKeysSettings;
+export default HotkeysSettings;
