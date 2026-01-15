@@ -5,40 +5,52 @@ const logger = createLogger('GameTimeService');
 const STORAGE_KEY = 'fortnite_tracker_game_time';
 
 export interface GameTimeStats {
-  raidTime: number; // in seconds (total accumulated)
-  lobbyTime: number; // in seconds (total accumulated)
-  totalTime: number; // in seconds
-  raidsPlayed: number; // count of raids played (total)
-  sessionRaidsPlayed: number; // count of raids played in current game session
-  currentRaidTime: number; // in seconds (current session, resets on scene change)
-  currentLobbyTime: number; // in seconds (current session, resets on scene change)
-  currentScene?: 'raid' | 'lobby'; // current scene state
-  currentTime: number; // current session time in seconds
-  avgRaidTime: number; // average raid time in seconds
-  avgDowntime: number; // average lobby/downtime in seconds
+  /** Total time in-game (in maps) in seconds */
+  inMapTime: number;
+  /** Total time in lobby in seconds */
+  lobbyTime: number;
+  /** Total played time in seconds */
+  totalTime: number;
+  /** Number of map sessions played (total) */
+  mapsPlayed: number;
+  /** Number of maps played in current game session */
+  sessionMapsPlayed: number;
+  /** Current session time in seconds */
+  currentTime: number;
+  /** Current scene state */
+  currentScene?: 'inMap' | 'lobby';
+  /** Average time per map in seconds */
+  avgMapTime: number;
+  /** Average lobby/downtime in seconds */
+  avgDowntime: number;
 }
 
 interface GameTimeData {
-  raidTime: number; // total seconds in raid
-  lobbyTime: number; // total seconds in lobby
-  raidsPlayed: number; // count of raids played (total)
-  sessionRaidsPlayed: number; // count of raids played in current game session
+  /** Total seconds in-map */
+  inMapTime: number;
+  /** Total seconds in lobby */
+  lobbyTime: number;
+  /** Count of maps played (total) */
+  mapsPlayed: number;
+  /** Count of maps played in current game session */
+  sessionMapsPlayed: number;
+  /** Current active session */
   currentSession?: {
-    state: 'raid' | 'lobby';
+    state: 'inMap' | 'lobby';
     startTime: number; // timestamp
   };
 }
 
 /**
- * Service for tracking time spent in raid vs lobby
+ * Service for tracking time spent in-game vs lobby
  */
 export class GameTimeService {
   private static _instance: GameTimeService;
   private _gameTimeData: GameTimeData = {
-    raidTime: 0,
+    inMapTime: 0,
     lobbyTime: 0,
-    raidsPlayed: 0,
-    sessionRaidsPlayed: 0
+    mapsPlayed: 0,
+    sessionMapsPlayed: 0
   };
 
   private constructor() {
@@ -54,28 +66,27 @@ export class GameTimeService {
 
   /**
    * Load game time data from localStorage
-   * Restore currentSession if it exists and is recent (game is running)
-   * Sessions older than 5 minutes are considered stale and cleared
    */
   private loadGameTimeData(): void {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored) as GameTimeData;
-        // Ensure raidsPlayed exists for backward compatibility
+        const parsed = JSON.parse(stored);
+        // Handle migration from old format (raidTime -> inMapTime)
         this._gameTimeData = {
-          raidTime: parsed.raidTime || 0,
-          lobbyTime: parsed.lobbyTime || 0,
-          raidsPlayed: parsed.raidsPlayed || 0,
-          sessionRaidsPlayed: parsed.sessionRaidsPlayed || 0,
-          // Restore current session even if it is older than 5 minutes.
-          // We rely on explicit game termination hooks to clear stale data.
-          currentSession: parsed.currentSession
+          inMapTime: parsed.inMapTime ?? parsed.raidTime ?? 0,
+          lobbyTime: parsed.lobbyTime ?? 0,
+          mapsPlayed: parsed.mapsPlayed ?? parsed.raidsPlayed ?? 0,
+          sessionMapsPlayed: parsed.sessionMapsPlayed ?? parsed.sessionRaidsPlayed ?? 0,
+          currentSession: parsed.currentSession ? {
+            state: parsed.currentSession.state === 'raid' ? 'inMap' : parsed.currentSession.state,
+            startTime: parsed.currentSession.startTime
+          } : undefined
         };
       }
     } catch (error) {
       logger.error('Error loading game time data:', error);
-      this._gameTimeData = { raidTime: 0, lobbyTime: 0, raidsPlayed: 0, sessionRaidsPlayed: 0 };
+      this._gameTimeData = { inMapTime: 0, lobbyTime: 0, mapsPlayed: 0, sessionMapsPlayed: 0 };
     }
   }
 
@@ -87,12 +98,12 @@ export class GameTimeService {
   }
 
   /**
-   * Reset session raids played counter (called when game launches)
+   * Reset session maps played counter (called when game launches)
    */
-  public resetSessionRaids(): void {
-    this._gameTimeData.sessionRaidsPlayed = 0;
+  public resetSessionMaps(): void {
+    this._gameTimeData.sessionMapsPlayed = 0;
     this.saveGameTimeData();
-    logger.debug('Reset session raids played counter');
+    logger.debug('Reset session maps played counter');
   }
 
   /**
@@ -109,9 +120,9 @@ export class GameTimeService {
   }
 
   /**
-   * Start tracking a game session state (raid or lobby)
+   * Start tracking a game session state (inMap or lobby)
    */
-  public startSession(state: 'raid' | 'lobby'): void {
+  public startSession(state: 'inMap' | 'lobby'): void {
     const current = this._gameTimeData.currentSession;
   
     // If we're already in this state, do nothing (prevents double-count on duplicate signals)
@@ -125,10 +136,10 @@ export class GameTimeService {
       this.endSession();
     }
   
-    // Increment raids played counter when starting a raid
-    if (state === 'raid') {
-      this._gameTimeData.raidsPlayed = (this._gameTimeData.raidsPlayed || 0) + 1;
-      this._gameTimeData.sessionRaidsPlayed = (this._gameTimeData.sessionRaidsPlayed || 0) + 1;
+    // Increment maps played counter when entering a map
+    if (state === 'inMap') {
+      this._gameTimeData.mapsPlayed = (this._gameTimeData.mapsPlayed || 0) + 1;
+      this._gameTimeData.sessionMapsPlayed = (this._gameTimeData.sessionMapsPlayed || 0) + 1;
     }
   
     this._gameTimeData.currentSession = {
@@ -136,7 +147,7 @@ export class GameTimeService {
       startTime: Date.now()
     };
     this.saveGameTimeData();
-    logger.debug(`Started ${state} session${state === 'raid' ? ` (Raid #${this._gameTimeData.raidsPlayed})` : ''}`);
+    logger.debug(`Started ${state} session${state === 'inMap' ? ` (Map #${this._gameTimeData.mapsPlayed})` : ''}`);
   }
 
   /**
@@ -148,69 +159,54 @@ export class GameTimeService {
     }
 
     const session = this._gameTimeData.currentSession;
-    const duration = Math.floor((Date.now() - session.startTime) / 1000); // in seconds
+    const durationSeconds = Math.floor((Date.now() - session.startTime) / 1000);
 
-    if (session.state === 'raid') {
-      this._gameTimeData.raidTime += duration;
+    if (session.state === 'inMap') {
+      this._gameTimeData.inMapTime += durationSeconds;
     } else {
-      this._gameTimeData.lobbyTime += duration;
+      this._gameTimeData.lobbyTime += durationSeconds;
     }
 
     this._gameTimeData.currentSession = undefined;
     this.saveGameTimeData();
-    logger.debug(`Ended ${session.state} session, duration: ${duration}s`);
+    logger.debug(`Ended ${session.state} session, duration: ${durationSeconds}s`);
   }
 
   /**
    * Get current game time stats
-   * Only includes active session time if there's a current session (game is running)
    */
   public getGameTimeStats(): GameTimeStats {
-    // If there's an active session, include its current duration
-    let currentRaidTime = this._gameTimeData.raidTime;
-    let currentLobbyTime = this._gameTimeData.lobbyTime;
-    
-    // Current session times (reset on scene change)
-    let currentSessionRaidTime = 0;
-    let currentSessionLobbyTime = 0;
-    let currentScene: 'raid' | 'lobby' | undefined = undefined;
+    let totalInMapTime = this._gameTimeData.inMapTime;
+    let totalLobbyTime = this._gameTimeData.lobbyTime;
+    let currentScene: 'inMap' | 'lobby' | undefined = undefined;
     let currentTime = 0;
 
-    // Only count time if there's an active session (game is running)
+    // Include current session time if active
     if (this._gameTimeData.currentSession) {
-      const duration = Math.floor((Date.now() - this._gameTimeData.currentSession.startTime) / 1000);
+      const durationSeconds = Math.floor((Date.now() - this._gameTimeData.currentSession.startTime) / 1000);
       currentScene = this._gameTimeData.currentSession.state;
-      currentTime = duration;
+      currentTime = durationSeconds;
       
-      if (this._gameTimeData.currentSession.state === 'raid') {
-        currentRaidTime += duration;
-        currentSessionRaidTime = duration; // Current raid session time
+      if (this._gameTimeData.currentSession.state === 'inMap') {
+        totalInMapTime += durationSeconds;
       } else {
-        currentLobbyTime += duration;
-        currentSessionLobbyTime = duration; // Current lobby session time
+        totalLobbyTime += durationSeconds;
       }
     }
 
-    // Calculate averages based on base totals (excluding current session)
-    // avgRaidTime = totalRaidTime / raidsPlayed
-    // avgDowntime = totalLobbyTime / raidsPlayed
-    const raidsPlayed = this._gameTimeData.raidsPlayed || 0;
-    const totalRaidTimeMs = this._gameTimeData.raidTime; // stored in seconds
-    const totalLobbyTimeMs = this._gameTimeData.lobbyTime; // stored in seconds
-    const avgRaidTime = raidsPlayed > 0 ? Math.floor(totalRaidTimeMs / raidsPlayed) : 0;
-    const avgDowntime = raidsPlayed > 0 ? Math.floor(totalLobbyTimeMs / raidsPlayed) : 0;
+    const mapsPlayed = this._gameTimeData.mapsPlayed || 0;
+    const avgMapTime = mapsPlayed > 0 ? Math.floor(this._gameTimeData.inMapTime / mapsPlayed) : 0;
+    const avgDowntime = mapsPlayed > 0 ? Math.floor(this._gameTimeData.lobbyTime / mapsPlayed) : 0;
 
     return {
-      raidTime: currentRaidTime,
-      lobbyTime: currentLobbyTime,
-      totalTime: currentRaidTime + currentLobbyTime,
-      raidsPlayed: raidsPlayed,
-      sessionRaidsPlayed: this._gameTimeData.sessionRaidsPlayed || 0,
-      currentRaidTime: currentSessionRaidTime,
-      currentLobbyTime: currentSessionLobbyTime,
-      currentScene: currentScene,
+      inMapTime: totalInMapTime,
+      lobbyTime: totalLobbyTime,
+      totalTime: totalInMapTime + totalLobbyTime,
+      mapsPlayed: mapsPlayed,
+      sessionMapsPlayed: this._gameTimeData.sessionMapsPlayed || 0,
       currentTime: currentTime,
-      avgRaidTime: avgRaidTime,
+      currentScene: currentScene,
+      avgMapTime: avgMapTime,
       avgDowntime: avgDowntime
     };
   }
@@ -221,20 +217,16 @@ export class GameTimeService {
   public resetGameTime(): void {
     this.endSession(); // End any active session first
     this._gameTimeData = {
-      raidTime: 0,
+      inMapTime: 0,
       lobbyTime: 0,
-      raidsPlayed: 0,
-      sessionRaidsPlayed: 0,
-      currentSession: undefined // Explicitly clear current session
+      mapsPlayed: 0,
+      sessionMapsPlayed: 0,
+      currentSession: undefined
     };
-    // Remove from localStorage to ensure it's completely cleared
     try {
       localStorage.removeItem(STORAGE_KEY);
-      // Also save empty data to ensure it's cleared
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this._gameTimeData));
-      // Dispatch events to notify all windows
       window.dispatchEvent(new Event('gameTimeChanged'));
-      // Trigger storage event for cross-window updates
       window.dispatchEvent(new StorageEvent('storage', {
         key: STORAGE_KEY,
         newValue: JSON.stringify(this._gameTimeData),
@@ -258,8 +250,7 @@ export class GameTimeService {
       this.endSession();
     }
     
-    // Always clear currentSession to ensure time stops counting
-    // This is critical - even if there was no session, we need to ensure it's cleared
+    // Ensure currentSession is cleared
     this._gameTimeData.currentSession = undefined;
     this.saveGameTimeData();
     
@@ -268,4 +259,3 @@ export class GameTimeService {
 }
 
 export const gameTimeService = GameTimeService.instance();
-

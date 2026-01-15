@@ -35,13 +35,12 @@ const formatTime = (seconds: number): string => {
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
 
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  } else if (minutes > 0) {
-    return `${minutes}m ${secs}s`;
-  } else {
-    return `${secs}s`;
-  }
+  const parts: string[] = [];
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
+  
+  return parts.join(' ');
 };
 
 const getStatusColor = (state: number): string => {
@@ -76,16 +75,14 @@ const getStatusTooltip = (state: number): string => {
 
 const GameTimeWidget: React.FC = () => {
   const [stats, setStats] = useState<GameTimeStats>({
-    raidTime: 0,
+    inMapTime: 0,
     lobbyTime: 0,
     totalTime: 0,
-    raidsPlayed: 0,
-    sessionRaidsPlayed: 0,
-    currentRaidTime: 0,
-    currentLobbyTime: 0,
+    mapsPlayed: 0,
+    sessionMapsPlayed: 0,
     currentScene: undefined,
     currentTime: 0,
-    avgRaidTime: 0,
+    avgMapTime: 0,
     avgDowntime: 0
   });
 
@@ -155,8 +152,8 @@ const GameTimeWidget: React.FC = () => {
     };
   }, []);
 
-  const raidPercentage = stats.totalTime > 0 
-    ? Math.round((stats.raidTime / stats.totalTime) * 100) 
+  const inMapPercentage = stats.totalTime > 0 
+    ? Math.round((stats.inMapTime / stats.totalTime) * 100) 
     : 0;
   const lobbyPercentage = stats.totalTime > 0 
     ? Math.round((stats.lobbyTime / stats.totalTime) * 100) 
@@ -192,20 +189,20 @@ const GameTimeWidget: React.FC = () => {
         <div className="game-time-raids-counter">
           <div className="game-time-raids-row">
             <div className="game-time-raids-item">
-              <div className="game-time-raids-label">Total Raids Played</div>
-              <div className="game-time-raids-value">{stats.raidsPlayed}</div>
+              <div className="game-time-raids-label">Total Maps Played</div>
+              <div className="game-time-raids-value">{stats.mapsPlayed}</div>
             </div>
             <div className="game-time-raids-item">
-              <div className="game-time-raids-label">Raids played this session</div>
-              <div className="game-time-raids-value">{stats.sessionRaidsPlayed}</div>
+              <div className="game-time-raids-label">Maps played this session</div>
+              <div className="game-time-raids-value">{stats.sessionMapsPlayed}</div>
             </div>
           </div>
         </div>
-        {stats.raidsPlayed > 0 && (
+        {stats.mapsPlayed > 0 && (
           <div className="game-time-averages">
             <div className="game-time-avg-item">
-              <span className="game-time-avg-label">Avg Raid Time:</span>
-              <span className="game-time-avg-value">{formatTime(stats.avgRaidTime)}</span>
+              <span className="game-time-avg-label">Avg Map Time:</span>
+              <span className="game-time-avg-value">{formatTime(stats.avgMapTime)}</span>
             </div>
             <div className="game-time-avg-separator">|</div>
             <div className="game-time-avg-item">
@@ -216,9 +213,9 @@ const GameTimeWidget: React.FC = () => {
         )}
         <div className="game-time-stats">
           <div className="game-time-stat">
-            <div className="game-time-label">Total In Raid</div>
-            <div className="game-time-value">{formatTime(stats.raidTime)}</div>
-            <div className="game-time-percentage">{raidPercentage}%</div>
+            <div className="game-time-label">Total In-Map</div>
+            <div className="game-time-value">{formatTime(stats.inMapTime)}</div>
+            <div className="game-time-percentage">{inMapPercentage}%</div>
           </div>
           <div className="game-time-stat">
             <div className="game-time-label">Total In Lobby</div>
@@ -235,7 +232,7 @@ const GameTimeWidget: React.FC = () => {
               {formatTime(stats.currentScene ? stats.currentTime : 0)}
             </div>
             <div className="game-time-percentage">
-              {stats.currentScene ? `In ${stats.currentScene === 'raid' ? 'Raid' : 'Lobby'}` : 'Not in-game'}
+              {stats.currentScene ? `In ${stats.currentScene === 'inMap' ? 'Map' : 'Lobby'}` : 'Not in-game'}
             </div>
           </div>
           <div className="game-time-stat">
@@ -248,8 +245,8 @@ const GameTimeWidget: React.FC = () => {
             <div className="game-time-ratio-bar">
               <div 
                 className="game-time-ratio-bar-raid" 
-                style={{ width: `${raidPercentage}%` }}
-                title={`Raid: ${raidPercentage}%`}
+                style={{ width: `${inMapPercentage}%` }}
+                title={`In-Map: ${inMapPercentage}%`}
               />
               <div 
                 className="game-time-ratio-bar-lobby" 
@@ -260,7 +257,7 @@ const GameTimeWidget: React.FC = () => {
             <div className="game-time-ratio-legend">
               <div className="game-time-legend-item">
                 <div className="game-time-legend-color game-time-legend-color-raid"></div>
-                <span className="game-time-legend-label">Raid</span>
+                <span className="game-time-legend-label">In-Map</span>
               </div>
               <div className="game-time-legend-item">
                 <div className="game-time-legend-color game-time-legend-color-lobby"></div>
