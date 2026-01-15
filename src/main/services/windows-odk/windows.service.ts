@@ -70,7 +70,7 @@ export class WindowsService {
     }
 
     public async showTrackerDesktopWindow(centerOnMonitor?: 'primary' | 'secondary', dockTo?: Edge): Promise<void> {
-        if (!this._trackerDesktopWindow) {
+        if (!this._trackerDesktopWindow || !(await this._trackerDesktopWindow.isOpen())) {
             await this.createTrackerDesktopWindow();
         }
 
@@ -97,6 +97,10 @@ export class WindowsService {
     }
 
     public async showTrackerIngameWindow(centerOnMonitor?: 'primary' | 'secondary', dockTo?: Edge): Promise<void> {
+        if (!this._trackerIngameWindow || !(await this._trackerIngameWindow.isOpen())) {
+            await this.createTrackerIngameWindow();
+        }
+
         await this.showWindow(this._trackerIngameWindow, centerOnMonitor, dockTo);
     }
 
@@ -149,7 +153,6 @@ export class WindowsService {
         } catch (error) {
             logger.error('Error closing window:', error);
         }
-
     }
 
     private async toggleWindow(window: WindowTypes): Promise<void> {
