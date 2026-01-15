@@ -1,6 +1,6 @@
 import React from 'react';
-import MapCard from '../../../../components/MapCard';
 import { MapData } from '../../../../../shared/consts';
+import MapCard from '../../../../components/MapCard';
 
 interface RecentMapsTileProps {
   maps: MapData[];
@@ -24,9 +24,9 @@ const RecentMapsTile: React.FC<RecentMapsTileProps> = ({ maps }) => {
       <div className="overview-tile-header">
         <h3>🕐 Recent Maps</h3>
       </div>
-      <div className="overview-maps-list">
+      <div className="recent-maps-scroll-wrapper">
         {hasRecentMaps ? (
-          <div className="overview-map-item">
+          <div className="recent-maps-grid">
             {maps.map((map: MapData) => (
               <MapCard key={map.map_id} map={map} />
             ))}
