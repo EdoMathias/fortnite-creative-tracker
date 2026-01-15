@@ -9,6 +9,7 @@ import { WindowsController } from './windows.controller';
 import { topMapsStore } from '../services/top-maps/top-maps.store';
 import { getTopMaps } from '../services/top-maps/top-maps.facade';
 import { getDashboardData, getLibraryData, getOverviewStats } from '../services/top-maps/dashboard-data.facade';
+import { gameTimeService } from '../../shared/services/GameTimeService';
 
 const logger = createLogger('BackgroundController');
 
@@ -28,6 +29,7 @@ export class BackgroundController {
   private _gameEventsService: GameEventsService;
 
   private _isGameRunning: boolean = false;
+  private _gameTimeBroadcastInterval: number | null = null;
 
   private constructor() {
     // Initialize MessageChannel first (used by other services)
@@ -61,6 +63,26 @@ export class BackgroundController {
     await topMapsStore.init();
     topMapsStore.recover();
 
+        // Subscribe to store changes and broadcast updated top-maps to renderer windows
+        topMapsStore.onChange(() => {
+          try {
+            const ranges: Array<import('../../shared/consts').TimeRange> = ['today', '7d', 'all'];
+            ranges.forEach(range => {
+              const maps = getTopMaps(range as any);
+              this._messageChannel.broadcastMessage(
+                [kWindowNames.trackerDesktop, kWindowNames.trackerIngame],
+                MessageType.TOP_MAPS_UPDATED,
+                { range, maps }
+              ).catch(err => logger.error('Error broadcasting top maps on change:', err));
+            });
+          } catch (err) {
+            logger.error('Error preparing top maps update on store change:', err);
+          }
+        });
+
+        // Start periodic game time broadcasts when session is active
+        this.startGameTimeBroadcasts();
+
     // Determine which window to show based on game state
     const shouldShowInGame = await this._gameStateService.isSupportedGameRunning();
     if (shouldShowInGame) {
@@ -82,10 +104,27 @@ export class BackgroundController {
       await this._windowsController.onGameLaunch();
       await this._gameEventsService.onGameLaunched(undefined, gameInfo);
       this._isGameRunning = true;
+      this.startGameTimeBroadcasts();
     } else {
+      // Stop periodic broadcasts first
+      this.stopGameTimeBroadcasts();
+      
       // Change later to primary
       await this._windowsController.showTrackerDesktopWindow('secondary');
+      
+      // End game time tracking and broadcast final update
       this._gameEventsService.onGameClosed();
+      
+      // Send a final game time update after a brief delay to ensure gameTimeService has finished saving
+      // This ensures widgets stop showing live time and display the final totals
+      setTimeout(() => {
+        this._messageChannel.broadcastMessage(
+          [kWindowNames.trackerDesktop, kWindowNames.trackerIngame],
+          MessageType.GAME_TIME_UPDATED,
+          {}
+        ).catch(err => logger.error('Error broadcasting final game time update:', err));
+      }, 100);
+      
       this._isGameRunning = false;
     }
   }
@@ -189,5 +228,39 @@ export class BackgroundController {
         stats
       ).catch(err => logger.error('Error broadcasting overview stats:', err));
     });
+
+    // Note: MAP_UPDATED is broadcast FROM background, not received here
+    // Data refreshes are triggered directly in GameEventsService when sessions end
   }
+
+  /**
+   * Start periodic game time broadcasts when a session is active
+   */
+  private startGameTimeBroadcasts(): void {
+    this.stopGameTimeBroadcasts(); // Clear any existing interval
+    
+    // Broadcast game time updates every 2 seconds when session is active
+    this._gameTimeBroadcastInterval = window.setInterval(() => {
+      const stats = gameTimeService.getGameTimeStats();
+      // Only broadcast if there's an active session
+      if (stats.currentScene) {
+        this._messageChannel.broadcastMessage(
+          [kWindowNames.trackerDesktop, kWindowNames.trackerIngame],
+          MessageType.GAME_TIME_UPDATED,
+          {}
+        ).catch(err => logger.error('Error broadcasting game time update:', err));
+      }
+    }, 2000);
+  }
+
+  /**
+   * Stop periodic game time broadcasts
+   */
+  private stopGameTimeBroadcasts(): void {
+    if (this._gameTimeBroadcastInterval !== null) {
+      clearInterval(this._gameTimeBroadcastInterval);
+      this._gameTimeBroadcastInterval = null;
+    }
+  }
+
 }

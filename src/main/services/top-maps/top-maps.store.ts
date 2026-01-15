@@ -100,6 +100,19 @@ let isInitialized = false;
 /** Pending save promise to prevent write conflicts */
 let pendingSave: Promise<void> | null = null;
 
+/** Change listeners to notify other services when store updates */
+const changeListeners = new Set<() => void>();
+
+function notifyChange() {
+    for (const l of Array.from(changeListeners)) {
+        try {
+            l();
+        } catch (e) {
+            console.error('[TopMapsStore] change listener error', e);
+        }
+    }
+}
+
 // ============================================================================
 // Internal Utilities
 // ============================================================================
@@ -172,6 +185,9 @@ function saveAsync(): void {
     } else {
         pendingSave = doSave();
     }
+
+    // Notify listeners immediately after scheduling a save so UIs can refresh
+    notifyChange();
 }
 
 /**
@@ -322,6 +338,12 @@ export const topMapsStore = {
             cachedStore = createEmptyStore();
             isInitialized = true;
         }
+    },
+
+    /** Subscribe to store changes. Returns an unsubscribe function. */
+    onChange(cb: () => void): () => void {
+        changeListeners.add(cb);
+        return () => changeListeners.delete(cb);
     },
 
     /**

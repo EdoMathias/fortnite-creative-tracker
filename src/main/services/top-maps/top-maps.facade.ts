@@ -9,7 +9,6 @@ import {
     startOfDay,
     dayKey,
     lastNDaysKeys,
-    formatDuration,
     MS_PER_DAY,
     MS_PER_MINUTE,
 } from "../../../shared/utils/dateUtils";
@@ -156,7 +155,7 @@ export function getTopMaps(range: TimeRange, resolveMeta?: MapMetaResolver): Map
             title,
             thumbnail,
             rank: idx + 1,
-            timePlayed: formatDuration(item.totalMs),
+            timePlayedMs: item.totalMs,
             trend,
             trendDirection: trendDirectionFrom7(trend),
             playCount: playCount.get(item.map_id),
